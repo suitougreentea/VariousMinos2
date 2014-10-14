@@ -1,6 +1,8 @@
 package io.github.suitougreentea.VariousMinos.state
 
 import scala.beans.BeanProperty
+import io.github.suitougreentea.VariousMinos.Phase
+import io.github.suitougreentea.VariousMinos.PhaseExecuter
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.state.StateBasedGame
 import org.newdawn.slick.state.BasicGameState
@@ -9,87 +11,66 @@ import io.github.suitougreentea.VariousMinos.CommonRenderer
 import io.github.suitougreentea.VariousMinos.Resource
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
+import org.newdawn.slick.Color
 
 class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRenderer {
   
   var field = new Field()
   
-  object Phase extends Enumeration {
-    /*
-     * WAITFORSPAWN<---------
-     *      V          |    |
-     * CONTROLLING------>MAKINGLARGEBOMB
-     *      V          |    ^
-     * -->WAITFORCOUNT |    |
-     * |    V          |    |
-     * |  COUNTING-----------
-     * |      V             |
-     * |  WAITFORERASE      |
-     * |      V             |
-     * |  ERASING           |
-     * |      V             |
-     * |  WAITFORFALL       |
-     * |      V             |
-     * |  FALLING           |
-     * |      V             |
-     * ---AFTERFALLING-------
-     */
-    val WAITFORSPAWN, CONTROLLING, WAITFORCOUNT, COUNTING, WAITFORERASE, ERASING, WAITFORFALL, FALLING, AFTERFALLING, MAKINGLARGEBOMB = Value
+  val phaseMoving = new Phase {
+    val id = 0
+    val beforeTime = 30
+    val afterTime = 30
+    def procedureWorking(executer: PhaseExecuter) {
+      var i = executer.game.getContainer().getInput()
+      if(i.isKeyPressed(Input.KEY_LEFT)) field.moveMinoLeft()
+      if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveMinoRight()
+      if(i.isKeyPressed(Input.KEY_DOWN)) field.moveMinoDown()
+      if(i.isKeyPressed(Input.KEY_UP)) field.moveMinoUp()
+      if(i.isKeyPressed(Input.KEY_Z)) field.rotateMinoCCW()
+      if(i.isKeyPressed(Input.KEY_X)) field.rotateMinoCW()
+      if(i.isKeyPressed(Input.KEY_A)) executer.enterPhase(this)
+    }
   }
-  var phase = Phase.CONTROLLING
+
+  val phaseCounting = new Phase {
+    val id = 0
+    val beforeTime = 30
+    val afterTime = 30
+    def procedureWorking(executer: PhaseExecuter) {
+    }
+  }
+  
+  var executer: PhaseExecuter = _
   
   def init(gc: GameContainer, sbg: StateBasedGame) = {
-    
+    executer = new PhaseExecuter(sbg)
   }
   
   override def enter(gc: GameContainer, sbg: StateBasedGame) = {
-    
+    executer.enterPhase(phaseMoving) 
   }
 
   def render(gc: GameContainer, sbg: StateBasedGame, g: Graphics) = {
+    Resource.design.draw()
+    
     Resource.frame.draw(152, 144)
+    g.pushTransform()
     g.translate(168, 512)
     drawField(g)(field)
+    g.popTransform()
+    
+    Resource.frame.draw(456, 144)
+    
+    g.setColor(new Color(1f, 1f, 1f))
+    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d".format(executer.currentPhase.id, executer.currentPosition.toString(), executer.timer), 472, 160)
   }
 
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int) = {
     var i = gc.getInput()
-    if(i.isKeyPressed(Input.KEY_LEFT)) field.moveMinoLeft()
-    if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveMinoRight()
-    if(i.isKeyPressed(Input.KEY_DOWN)) field.moveMinoDown()
-    if(i.isKeyPressed(Input.KEY_UP)) field.moveMinoUp()
-    if(i.isKeyPressed(Input.KEY_Z)) field.rotateMinoCCW()
-    if(i.isKeyPressed(Input.KEY_X)) field.rotateMinoCW()
+
+    executer.exec()
     
-    /* TODO: this will be replaced by Phase / PhaseExecuter */
-    
-    if(phase == Phase.WAITFORSPAWN) {
-      if(/* Timer */false) phase = Phase.CONTROLLING
-    }
-    if(phase == Phase.CONTROLLING) {
-      if(/* AdditionalLines */false) phase = Phase.WAITFORCOUNT
-      else {
-        if(/* LargeBomb */false) phase = Phase.MAKINGLARGEBOMB
-        else phase = Phase.WAITFORSPAWN
-      }
-    }
-    if(phase == Phase.WAITFORCOUNT) {
-      if(/* Timer */false) phase = Phase.COUNTING
-    }
-    if(phase == Phase.COUNTING) {
-      if(/* Timer */false) {
-        if(/* Explodable */false) phase = Phase.WAITFORERASE
-        else {
-          if(/* LargeBomb */false) phase = Phase.MAKINGLARGEBOMB
-          else phase = Phase.WAITFORSPAWN
-        }
-      }
-    }
-    if(phase == Phase.WAITFORERASE) {
-      if(/* Timer */false) phase = Phase.ERASING
-    }
-    if(phase == Phase.ERASING) {
-      if(/* Done */false) phase = Phase.WAITFORFALL
-    }
+    i.clearKeyPressedRecord()
   }
 }

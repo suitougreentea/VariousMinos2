@@ -8,17 +8,20 @@ import org.newdawn.slick.Graphics
 import javax.annotation.Resource
 import io.github.suitougreentea.VariousMinos.state.StateTetra
 import io.github.suitougreentea.VariousMinos.state.StateDebug
+import io.github.suitougreentea.VariousMinos.state.StateBomb
 
 class GameVariousMinos(val name: String) extends StateBasedGame(name) {
   this.addState(new StateDebug(-1))
   this.addState(new StateLoading(0))
   this.addState(new StateTetra(1))
-  this.enterState(1)
+  this.addState(new StateBomb(2))
+  this.enterState(2)
 
   def initStatesList(gc: GameContainer) = {
     this.getState(-1).init(gc, this)   
     this.getState(0).init(gc, this)   
     this.getState(1).init(gc, this)   
+    this.getState(2).init(gc, this)   
   }
 }
 

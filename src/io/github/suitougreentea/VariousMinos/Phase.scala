@@ -7,6 +7,7 @@ trait Phase {
   val id: Int
   def beforeTime: Int
   def afterTime: Int
+  def handleBeforeBefore(executer: PhaseExecuter) {}
   def procedureBefore(executer: PhaseExecuter) {
     if(executer.timer == beforeTime) {
       executer.timer = 0
@@ -15,7 +16,9 @@ trait Phase {
       executer.timer += 1 
     }
   }
+  def handleAfterBefore(executer: PhaseExecuter) {}
   def procedureWorking(executer: PhaseExecuter)
+  def handleBeforeAfter(executer: PhaseExecuter) {}
   def procedureAfter(executer: PhaseExecuter) {
     if(executer.timer == beforeTime) {
       executer.timer = 0
@@ -24,6 +27,7 @@ trait Phase {
       executer.timer += 1 
     }
   }
+  def handleAfterAfter(executer: PhaseExecuter) {}
 }
 
 class PhaseExecuter (val game: StateBasedGame) {
@@ -53,18 +57,22 @@ class PhaseExecuter (val game: StateBasedGame) {
   
   // 実際にフェーズが移り変わる
   def moveToNewPhase() {
+    _currentPhase.handleAfterAfter(this)
     _currentPhase = _nextPhase
     currentPosition = Position.BEFORE
+    _currentPhase.handleBeforeBefore(this)
     _currentPhase.procedureBefore(this)
   }
   
   def moveToWorking() {
     currentPosition = Position.WORKING
+    _currentPhase.handleAfterBefore(this)
     _currentPhase.procedureWorking(this)
   }
   
   def moveToAfter() {
     currentPosition = Position.AFTER
+    _currentPhase.handleBeforeAfter(this)
     _currentPhase.procedureAfter(this)
   }
   

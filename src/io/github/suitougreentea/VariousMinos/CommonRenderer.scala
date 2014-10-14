@@ -19,17 +19,29 @@ trait CommonRenderer {
   
   def drawField(g: Graphics)(field: Field) {
     for(iy <- 0 until field.height; ix <- 0 until 10) drawBlock(g)(field(ix, iy), ix * 16, -iy * 16 - 16)
+  }
+  
+  def drawFieldMino(g: Graphics)(field: Field) {
     var mino = field.currentMino
     var mx = field.currentMinoX
     var my = field.currentMinoY
-    
     g.pushTransform()
     g.translate(mx * 16, -my * 16)
     drawMino(g)(mino)
     g.popTransform()
   }
+  
+  def drawFieldMinoGhost(g: Graphics)(field: Field) {
+    var mino = field.currentMino
+    var mx = field.currentMinoX
+    var my = field.ghostY
+    g.pushTransform()
+    g.translate(mx * 16, -my * 16)
+    drawMino(g)(mino, 0.5f)
+    g.popTransform()
+  }
 
-  def drawMino(g: Graphics)(mino: Mino) {
-    for(iy <- 0 until 5; ix <- 0 until 5) drawBlock(g)(mino(ix, iy), ix * 16, -iy * 16 - 16)
+  def drawMino(g: Graphics)(mino: Mino, transparency: Float = 1f) {
+    for(iy <- 0 until 5; ix <- 0 until 5) drawBlock(g)(mino(ix, iy), ix * 16, -iy * 16 - 16, false, transparency)
   }
 }

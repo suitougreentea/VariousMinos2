@@ -1,13 +1,14 @@
 package io.github.suitougreentea.VariousMinos
 
 import scala.language.dynamics
+import scala.collection.mutable.ArraySeq
 
 class Field {
   private var _field = IndexedSeq.fill(30)(Array.fill(10)(new Block(0)))
   def field = _field
   
   def apply(x: Int, y:Int): Block = if(x < 0 || x >= 10 || y < 0 || y >= height) new Block(-1) else _field(y)(x)
-  def update(x: Int, y:Int, value: Block) = _field(y)(x) = value
+  def update(x: Int, y:Int, value: Block) = if(x >= 0 && x < 10 && y >= 0 && y < height) _field(y)(x) = value
   
   def height = _field.size
   
@@ -132,6 +133,22 @@ class Field {
       if(!field(mx + ix, my + iy).transparent && !mino(ix, iy).transparent) return true
     }
     return false
+  }
+  
+  def filledLines = {
+    var result = ArraySeq.empty[Int]
+    for(iy <- 0 until height) {
+      var num = 0
+      for(ix <- 0 until 10) {
+        if(this(ix, iy).id != 0){
+          num += 1
+        }
+      }
+      if(num == 10){
+        result :+= iy
+      }
+    }
+    result
   }
 
 }

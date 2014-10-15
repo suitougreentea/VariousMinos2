@@ -5,12 +5,14 @@ import org.newdawn.slick.Image
 object Resource {
   var frame,
   design,
-  block: Image = _
+  block,
+  bomb: Image = _
 
   def load(){
     frame = loadImage("image/frame.png")
     design = loadImage("image/design.png")
     block = loadImage("image/block.png")
+    bomb = loadImage("image/bomb.png")
   }
   
   def loadImage(path: String): Image = {

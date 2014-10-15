@@ -16,6 +16,7 @@ import io.github.suitougreentea.VariousMinos.Position
 import io.github.suitougreentea.VariousMinos.MinoList
 import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.Mino
+import scala.collection.mutable.HashSet
 
 class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRenderer {
   
@@ -28,15 +29,18 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     new Mino(id, 0, array)
   }
   
-  val phaseMoving = new Phase {
+  val bombSize = Array ((3, 0), (3, 1), (3, 2), (3, 3), (4, 4), (4, 4), (5, 5), (5, 5), (6, 6), (6, 6), (7, 7), (7, 7), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8))
+  
+  val phaseMoving : Phase = new Phase {
     val id = 0
-    val beforeTime = 10
-    val afterTime = 10
+    val beforeTime = 0
+    val afterTime = 0
     override def handleAfterBefore(executer: PhaseExecuter) {
       fallCounter = 0
 			softDropCounter = 0
 			lockdownTimer = 0
 			forceLockdownTimer = 0
+			lastLines = field.filledLines.length
       field.newMino()
     }
     def procedureWorking(executer: PhaseExecuter) {
@@ -89,7 +93,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       }
       if(i.isKeyPressed(Input.KEY_UP)) {
         field.hardDrop()
-        executer.enterPhase(if(/*AdditionalLine*/false) phaseCounting else this)
+        executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else this, true)
       }
       if(i.isKeyPressed(Input.KEY_Z)){
         field.rotateMinoCCW()
@@ -116,7 +120,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
           field.hardDrop()
-          executer.enterPhase(if(/*AdditionalLine*/false) phaseCounting else this)
+          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else this, true)
         }
         lockdownTimer += 1
         forceLockdownTimer += 1
@@ -124,11 +128,72 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     }
   }
 
-  val phaseCounting = new Phase {
-    val id = 0
+  val phaseCounting : Phase = new Phase {
+    val id = 1
     val beforeTime = 10
     val afterTime = 10
     def procedureWorking(executer: PhaseExecuter) {
+      executer.enterPhase(phaseErasing, true)
+    }
+  }
+  
+  var bombList: HashSet[(Int, Int, Boolean)] = HashSet.empty
+  var bombTimer = 0
+  var bombTimerMiddle = 30
+  var bombTimerMax = 40
+  
+  val phaseErasing : Phase = new Phase {
+    val id = 2
+    val beforeTime = 0
+    val afterTime = 0
+    var bombListNew: HashSet[(Int, Int, Boolean)] = HashSet.empty
+    override def handleAfterBefore(executer: PhaseExecuter) {
+      bombList = HashSet.empty
+      lastLines = field.filledLines.length
+      for(iy <- field.filledLines; ix <- 0 until 10){
+        if(field(ix, iy).id == 64) bombList += Tuple3(ix, iy, false)
+      }
+    }
+    def procedureWorking(executer: PhaseExecuter) {
+      if(bombTimer == bombTimerMiddle){
+        for(e <- bombList) {
+          var (width, height) = bombSize(lastLines - 1)
+          var (x, y, big) = e
+          for(iy <- (y - height) to (y + height); ix <- (x - width) to (x + width)) {
+            if(field(ix, iy).id == 64 && !bombList.contains(Tuple3(ix, iy, false)) && !bombList.contains(Tuple3(ix, iy, true))){
+              bombListNew += Tuple3(ix, iy, false)
+            } else {
+              field(ix, iy) = new Block(0)
+            }
+          }
+        }
+      }
+      if(bombTimer == bombTimerMax) {
+        bombTimer = 0
+        if(bombListNew.size == 0){
+          executer.enterPhase(phaseFalling, true)
+        } else {
+          bombList = bombListNew
+          bombListNew = HashSet.empty
+        }
+      }
+      bombTimer += 1
+    }
+  }
+  val phaseFalling : Phase = new Phase {
+    val id = 3
+    val beforeTime = 0
+    val afterTime = 0
+    def procedureWorking(executer: PhaseExecuter) {
+      executer.enterPhase(phaseMakingBigBomb, true)
+    }
+  }
+  val phaseMakingBigBomb : Phase = new Phase {
+    val id = 4
+    val beforeTime = 0
+    val afterTime = 0
+    def procedureWorking(executer: PhaseExecuter) {
+      executer.enterPhase(phaseMoving, true)
     }
   }
   
@@ -148,6 +213,8 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   private var firstMoveTimerMax = 5
   private var moveCounter = 0f
   private var moveCounterDelta = 0.5f
+  
+  private var lastLines = 0
   
   def init(gc: GameContainer, sbg: StateBasedGame) = {
     executer = new PhaseExecuter(sbg)
@@ -169,6 +236,28 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       drawFieldMino(g)(field)
       drawFieldMinoGhost(g)(field)
     }
+    if(executer.currentPhase.id == 2) {
+      for(e <- bombList){
+        var width = bombSize(lastLines - 1)._1 toFloat
+        var height = bombSize(lastLines - 1)._2 toFloat
+        var multiplier = 0f
+        if(bombTimer < bombTimerMiddle){
+          var x = bombTimer / (bombTimerMiddle toFloat)
+          multiplier = -(Math.pow((x - 1), 2) - 1) toFloat
+        } else if(bombTimer < bombTimerMax){
+          var x = (bombTimer - bombTimerMiddle) / (bombTimerMax - bombTimerMiddle toFloat)
+          multiplier = -(Math.pow(x, 2) - 1) toFloat
+        } else multiplier = 0
+        width *= multiplier
+        height *= multiplier
+        var (x, y, big) = e
+        var topLeftX = (x - width) * 16
+        var topLeftY = -(y + height + 1) * 16
+        var renderWidth = (width * 2 + 1) * 16
+        var renderHeight = (height * 2 + 1) * 16
+        Resource.bomb.draw(topLeftX, topLeftY, renderWidth, renderHeight)
+      }
+    }
     g.popTransform()
     
     g.pushTransform()
@@ -187,7 +276,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     Resource.frame.draw(456, 144)
     
     g.setColor(new Color(1f, 1f, 1f))
-    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f".
+    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d".
         format(executer.currentPhase.id,
             executer.currentPosition.toString(),
             executer.timer,
@@ -197,7 +286,9 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
             forceLockdownTimer,
             moveDirection,
             firstMoveTimer,
-            moveCounter),
+            moveCounter,
+            lastLines,
+            bombTimer),
             472, 160)
   }
 

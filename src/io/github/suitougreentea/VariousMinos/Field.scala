@@ -2,6 +2,7 @@ package io.github.suitougreentea.VariousMinos
 
 import scala.language.dynamics
 import scala.collection.mutable.ArraySeq
+import scala.collection.mutable.HashSet
 
 class Field {
   private var _field = IndexedSeq.fill(30)(Array.fill(10)(new Block(0)))
@@ -20,6 +21,8 @@ class Field {
   var nextMino: Array[Mino] = _
   var holdMino: Mino = null
   var alreadyHolded = false
+  
+  var fallingPieceSet: HashSet[FallingPiece] = HashSet.empty
   
   def init(){
     nextMino = Array.fill(7)(generateMino())
@@ -150,5 +153,36 @@ class Field {
     }
     result
   }
+  
+  def makeFallingPieces() {
+    for(iy <- 0 until height; ix <- 0 until 10){
+      if(this(ix, iy).id > 0) fallingPieceSet += makeFallingPiece(new FallingPiece(), ix, iy)
+    }
+  }
+  
+  def makeFallingPiece(piece: FallingPiece, x: Int, y: Int) : FallingPiece = {
+    var result = piece
+    result(x, y) = this(x, y)
+    this(x, y) = new Block(0)
+    if(this(x - 1, y).id > 0) result = makeFallingPiece(piece, x - 1, y)
+    if(this(x + 1, y).id > 0) result = makeFallingPiece(piece, x + 1, y)
+    if(this(x, y - 1).id > 0) result = makeFallingPiece(piece, x, y - 1)
+    if(this(x, y + 1).id > 0) result = makeFallingPiece(piece, x, y + 1)
+    result
+  }
+  
+  // use FallingPiece.y
+  def checkHitFallingPiece(field: Field = this, piece: FallingPiece): Boolean = {
+    for(iy <- piece.y until piece.y + piece.height; ix <- 0 until 10) {
+      if(!field(ix, iy).transparent && !piece(ix, iy).transparent) return true
+    }
+    return false
+  }
 
+  def setFallingPiece(piece: FallingPiece){
+    for(iy <- piece.y until piece.y + piece.height; ix <- 0 until 10) {
+      if(piece(ix, iy).id > 0) this(ix, iy) = piece(ix, iy)
+    }
+  }
+  
 }

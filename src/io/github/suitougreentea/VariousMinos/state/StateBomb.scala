@@ -133,7 +133,11 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     val beforeTime = 10
     val afterTime = 10
     def procedureWorking(executer: PhaseExecuter) {
-      executer.enterPhase(phaseErasing, true)
+      if(existBombLine){
+        chain += 1
+        executer.enterPhase(phaseErasing, true)
+      }
+      else executer.enterPhase(phaseMoving, true)
     }
   }
   
@@ -157,7 +161,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     def procedureWorking(executer: PhaseExecuter) {
       if(bombTimer == bombTimerMiddle){
         for(e <- bombList) {
-          var (width, height) = bombSize(lastLines - 1)
+          var (width, height) = bombSize(lastLines + chain - 1 - 1)
           var (x, y, big) = e
           for(iy <- (y - height) to (y + height); ix <- (x - width) to (x + width)) {
             if(field(ix, iy).id == 64 && !bombList.contains(Tuple3(ix, iy, false)) && !bombList.contains(Tuple3(ix, iy, true))){
@@ -171,7 +175,13 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       if(bombTimer == bombTimerMax) {
         bombTimer = 0
         if(bombListNew.size == 0){
-          executer.enterPhase(phaseFalling, true)
+          field.makeFallingPieces()
+          if(field.fallingPieceSet.size == 0){
+            chain = 0
+            executer.enterPhase(phaseMoving, true)
+          } else {
+            executer.enterPhase(phaseFalling, true)
+          }
         } else {
           bombList = bombListNew
           bombListNew = HashSet.empty
@@ -180,12 +190,34 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       bombTimer += 1
     }
   }
+  
+  var fallingPieceCounter = 0f
+  var fallingPieceCounterDelta = 1f
+  
   val phaseFalling : Phase = new Phase {
     val id = 3
     val beforeTime = 0
     val afterTime = 0
     def procedureWorking(executer: PhaseExecuter) {
-      executer.enterPhase(phaseMakingBigBomb, true)
+      fallingPieceCounter += fallingPieceCounterDelta
+      while (fallingPieceCounter >= 1){
+        for(e <- field.fallingPieceSet){
+          e.y -= 1
+          if(field.checkHitFallingPiece(piece = e)) {
+            e.y += 1
+            field.setFallingPiece(e)
+            field.fallingPieceSet -= e
+          }
+        }
+        fallingPieceCounter -= 1
+      }
+      if(field.fallingPieceSet.size == 0){
+        if(field.filledLines.length > 0 && existBombLine) executer.enterPhase(phaseCounting, true)
+        else {
+          chain = 0
+          executer.enterPhase(phaseMakingBigBomb, true)
+        }
+      }
     }
   }
   val phaseMakingBigBomb : Phase = new Phase {
@@ -195,6 +227,13 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     def procedureWorking(executer: PhaseExecuter) {
       executer.enterPhase(phaseMoving, true)
     }
+  }
+  
+  def existBombLine: Boolean = {
+    for(iy <- field.filledLines; ix <- 0 until 10){
+      if(field(ix, iy).id == 64) return true
+    }
+    return false
   }
   
   var executer: PhaseExecuter = _
@@ -215,6 +254,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   private var moveCounterDelta = 0.5f
   
   private var lastLines = 0
+  private var chain = 0
   
   def init(gc: GameContainer, sbg: StateBasedGame) = {
     executer = new PhaseExecuter(sbg)
@@ -238,8 +278,8 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     }
     if(executer.currentPhase.id == 2) {
       for(e <- bombList){
-        var width = bombSize(lastLines - 1)._1 toFloat
-        var height = bombSize(lastLines - 1)._2 toFloat
+        var width = bombSize(lastLines + chain - 1 - 1)._1 toFloat
+        var height = bombSize(lastLines + chain - 1 - 1)._2 toFloat
         var multiplier = 0f
         if(bombTimer < bombTimerMiddle){
           var x = bombTimer / (bombTimerMiddle toFloat)
@@ -257,6 +297,9 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
         var renderHeight = (height * 2 + 1) * 16
         Resource.bomb.draw(topLeftX, topLeftY, renderWidth, renderHeight)
       }
+    }
+    for(e <- field.fallingPieceSet) {
+      drawFallingPiece(g)(e)
     }
     g.popTransform()
     
@@ -276,7 +319,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     Resource.frame.draw(456, 144)
     
     g.setColor(new Color(1f, 1f, 1f))
-    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d".
+    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
         format(executer.currentPhase.id,
             executer.currentPosition.toString(),
             executer.timer,
@@ -288,7 +331,9 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
             firstMoveTimer,
             moveCounter,
             lastLines,
-            bombTimer),
+            bombTimer,
+            fallingPieceCounter,
+            chain),
             472, 160)
   }
 

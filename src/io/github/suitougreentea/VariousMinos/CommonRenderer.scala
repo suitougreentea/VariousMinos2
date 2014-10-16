@@ -44,4 +44,8 @@ trait CommonRenderer {
   def drawMino(g: Graphics)(mino: Mino, transparency: Float = 1f) {
     for(iy <- 0 until 5; ix <- 0 until 5) drawBlock(g)(mino(ix, iy), ix * 16, -iy * 16 - 16, false, transparency)
   }
+
+  def drawFallingPiece(g: Graphics)(piece: FallingPiece) {
+    for(iy <- piece.y until piece.y + piece.height; ix <- 0 until 10) drawBlock(g)(piece(ix, iy), ix * 16, -iy * 16 - 16, false, 0.8f)
+  }
 }

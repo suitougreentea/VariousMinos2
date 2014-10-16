@@ -93,7 +93,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       }
       if(i.isKeyPressed(Input.KEY_UP)) {
         field.hardDrop()
-        executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else this, true)
+        executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
       }
       if(i.isKeyPressed(Input.KEY_Z)){
         field.rotateMinoCCW()
@@ -120,7 +120,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
           field.hardDrop()
-          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else this, true)
+          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
         }
         lockdownTimer += 1
         forceLockdownTimer += 1
@@ -137,7 +137,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
         chain += 1
         executer.enterPhase(phaseErasing, true)
       }
-      else executer.enterPhase(phaseMoving, true)
+      else executer.enterPhase(phaseMakingBigBomb, true)
     }
   }
   
@@ -155,7 +155,12 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       bombList = HashSet.empty
       lastLines = field.filledLines.length
       for(iy <- field.filledLines; ix <- 0 until 10){
-        if(field(ix, iy).id == 64) bombList += Tuple3(ix, iy, false)
+        field(ix, iy).id match {
+          case 64 => bombList += Tuple3(ix, iy, false)
+          case 128 if(!bombList.contains(Tuple3(ix, iy - 1, true))) => bombList += Tuple3(ix, iy - 1, true)
+          case 192 => bombList += Tuple3(ix, iy, true)
+          case _ =>
+        }
       }
     }
     def procedureWorking(executer: PhaseExecuter) {
@@ -163,9 +168,25 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
         for(e <- bombList) {
           var (width, height) = bombSize(lastLines + chain - 1 - 1)
           var (x, y, big) = e
-          for(iy <- (y - height) to (y + height); ix <- (x - width) to (x + width)) {
-            if(field(ix, iy).id == 64 && !bombList.contains(Tuple3(ix, iy, false)) && !bombList.contains(Tuple3(ix, iy, true))){
+          var yr, xr: Range = null
+          if(big) {
+            yr = (y - 4) to (y + 5)
+            xr = (x - 4) to (x + 5)
+          }else{
+            yr = (y - height) to (y + height)
+            xr = (x - width) to (x + width)
+          }
+          for(iy <- yr; ix <- xr) {
+            if(field(ix, iy).id == 64 && !bombList.contains(Tuple3(ix, iy, false))){
               bombListNew += Tuple3(ix, iy, false)
+            } else if(field(ix, iy).id == 128 && !bombList.contains(Tuple3(ix, iy - 1, true))) {
+              bombListNew += Tuple3(ix, iy - 1, true)
+            } else if(field(ix, iy).id == 129 && !bombList.contains(Tuple3(ix - 1, iy - 1, true))) {
+              bombListNew += Tuple3(ix - 1, iy - 1, true)
+            } else if(field(ix, iy).id == 192 && !bombList.contains(Tuple3(ix, iy, true))) {
+              bombListNew += Tuple3(ix, iy, true)
+            } else if(field(ix, iy).id == 193 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
+              bombListNew += Tuple3(ix - 1, iy, true)
             } else {
               field(ix, iy) = new Block(0)
             }
@@ -178,7 +199,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
           field.makeFallingPieces()
           if(field.fallingPieceSet.size == 0){
             chain = 0
-            executer.enterPhase(phaseMoving, true)
+            executer.enterPhase(phaseMakingBigBomb, true)
           } else {
             executer.enterPhase(phaseFalling, true)
           }
@@ -220,21 +241,51 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       }
     }
   }
+  var makingBigBombSet: HashSet[(Int, Int)] = HashSet.empty
   val phaseMakingBigBomb : Phase = new Phase {
     val id = 4
-    val beforeTime = 0
-    val afterTime = 0
+    val beforeTime = 10
+    val afterTime = 10
+    override def handleBeforeBefore(executer: PhaseExecuter){
+      // 上が優先される
+      for(iy <- field.height - 1 to 0 by -1; ix <- 0 until 10){
+        if(field(ix, iy).id == 64){
+          if(!makingBigBombSet.contains(Tuple2(ix - 1, iy)) && !makingBigBombSet.contains(Tuple2(ix, iy + 1)) && !makingBigBombSet.contains(Tuple2(ix - 1, iy + 1))){
+            if(field(ix + 1, iy).id == 64 && field(ix, iy - 1).id == 64 && field(ix + 1, iy - 1).id == 64){
+              makingBigBombSet += Tuple2(ix, iy)
+            }
+          }
+        }
+      }
+    }
+    override def procedureBefore(executer: PhaseExecuter){
+      if(makingBigBombSet.size == 0) executer.enterPhase(phaseMoving, false)
+      else super.procedureBefore(executer)
+    }
     def procedureWorking(executer: PhaseExecuter) {
+      for(e <- makingBigBombSet){
+        var (x, y) = e
+        field(x, y) = new Block(128)
+        field(x + 1, y) = new Block(129)
+        field(x, y - 1) = new Block(192)
+        field(x + 1, y - 1) = new Block(193)
+      }
+      makingBigBombSet = HashSet.empty
       executer.enterPhase(phaseMoving, true)
     }
   }
   
   def existBombLine: Boolean = {
     for(iy <- field.filledLines; ix <- 0 until 10){
-      if(field(ix, iy).id == 64) return true
+      field(ix, iy).id match {
+        case 64 | 128 | 129 | 192 | 193 => return true
+        case _ =>
+      }
     }
     return false
   }
+  
+  
   
   var executer: PhaseExecuter = _
   
@@ -278,19 +329,29 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     }
     if(executer.currentPhase.id == 2) {
       for(e <- bombList){
-        var width = bombSize(lastLines + chain - 1 - 1)._1 toFloat
-        var height = bombSize(lastLines + chain - 1 - 1)._2 toFloat
+        var x = e._1 toFloat
+        var y = e._2 toFloat
+        var big = e._3
+        var width, height = 0f
+        if(big){
+          x += 0.5f
+          y += 0.5f
+          width = 4.5f
+          height = 4.5f
+        } else {          
+          width = bombSize(lastLines + chain - 1 - 1)._1
+          height = bombSize(lastLines + chain - 1 - 1)._2
+        }
         var multiplier = 0f
         if(bombTimer < bombTimerMiddle){
-          var x = bombTimer / (bombTimerMiddle toFloat)
-          multiplier = -(Math.pow((x - 1), 2) - 1) toFloat
+          var t = bombTimer / (bombTimerMiddle toFloat)
+          multiplier = -(Math.pow((t - 1), 2) - 1) toFloat
         } else if(bombTimer < bombTimerMax){
-          var x = (bombTimer - bombTimerMiddle) / (bombTimerMax - bombTimerMiddle toFloat)
-          multiplier = -(Math.pow(x, 2) - 1) toFloat
+          var t = (bombTimer - bombTimerMiddle) / (bombTimerMax - bombTimerMiddle toFloat)
+          multiplier = -(Math.pow(t, 2) - 1) toFloat
         } else multiplier = 0
         width *= multiplier
         height *= multiplier
-        var (x, y, big) = e
         var topLeftX = (x - width) * 16
         var topLeftY = -(y + height + 1) * 16
         var renderWidth = (width * 2 + 1) * 16

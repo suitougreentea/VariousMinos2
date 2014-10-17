@@ -1,6 +1,6 @@
 package io.github.suitougreentea.VariousMinos
 
-class Mino (minoId: Int, defaultRotationState: Int, blocks: Array[Block]){
+class Mino (val minoId: Int, defaultRotationState: Int, blocks: Array[Block]){
   private var _array = Array.fill(5)(Array.fill(5)(new Block(0)))
   private var _rotationState = 0
   def rotationState = _rotationState
@@ -52,10 +52,10 @@ class Mino (minoId: Int, defaultRotationState: Int, blocks: Array[Block]){
 object MinoList {
   private val _list = Array (
       Array ((2, 2)),  // 1
-      Array ((1, 2), (2, 2)),  // 2
+      Array ((1, 3), (2, 3)),  // 2
       Array ((1, 2), (2, 2), (3, 2)),  // 3I
       Array ((1, 3), (1, 2), (2, 2)),  // 3L
-      Array ((0, 2), (1, 2), (2, 2), (3, 2)),  // 4I
+      Array ((0, 3), (1, 3), (2, 3), (3, 3)),  // 4I
       Array ((1, 3), (1, 2), (2, 2), (3, 2)),  // 4J
       Array ((3, 3), (1, 2), (2, 2), (3, 2)),  // 4L
       Array ((1, 3), (2, 3), (1, 2), (2, 2)),  // 4O

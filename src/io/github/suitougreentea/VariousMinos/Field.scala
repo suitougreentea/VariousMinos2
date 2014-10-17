@@ -24,6 +24,8 @@ class Field {
   
   var fallingPieceSet: HashSet[FallingPiece] = HashSet.empty
   
+  var system: RotationSystem = new RotationSystemStandard()
+  
   def init(){
     nextMino = Array.fill(7)(generateMino())
     newMino()
@@ -76,23 +78,11 @@ class Field {
   }
   
   def rotateMinoCW(): Boolean = {
-    currentMino.rotateCW()
-    if(checkHit()) {
-      currentMino.rotateCCW()
-      false
-    } else {
-      true
-    }
+    system.rotateCW(this)
   }
 
   def rotateMinoCCW(): Boolean = {
-    currentMino.rotateCCW()
-    if(checkHit()) {
-      currentMino.rotateCW()
-      false
-    } else {
-      true
-    }
+    system.rotateCCW(this)
   }
   
   def hardDrop() {

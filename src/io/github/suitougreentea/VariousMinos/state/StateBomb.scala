@@ -143,8 +143,8 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   
   var bombList: HashSet[(Int, Int, Boolean)] = HashSet.empty
   var bombTimer = 0
-  var bombTimerMiddle = 30
-  var bombTimerMax = 40
+  var bombTimerMiddle = 8
+  var bombTimerMax = 30
   
   val phaseErasing : Phase = new Phase {
     val id = 2
@@ -343,20 +343,21 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
           height = bombSize(lastLines + chain - 1 - 1)._2
         }
         var multiplier = 0f
+        var transparency = 1f
         if(bombTimer < bombTimerMiddle){
           var t = bombTimer / (bombTimerMiddle toFloat)
           multiplier = -(Math.pow((t - 1), 2) - 1) toFloat
-        } else if(bombTimer < bombTimerMax){
-          var t = (bombTimer - bombTimerMiddle) / (bombTimerMax - bombTimerMiddle toFloat)
-          multiplier = -(Math.pow(t, 2) - 1) toFloat
-        } else multiplier = 0
+        } else {
+          transparency = 1f - (bombTimer - bombTimerMiddle) / (bombTimerMax - bombTimerMiddle toFloat)
+          multiplier = 1
+        }
         width *= multiplier
         height *= multiplier
         var topLeftX = (x - width) * 16
         var topLeftY = -(y + height + 1) * 16
         var renderWidth = (width * 2 + 1) * 16
         var renderHeight = (height * 2 + 1) * 16
-        Resource.bomb.draw(topLeftX, topLeftY, renderWidth, renderHeight)
+        Resource.bomb.draw(topLeftX, topLeftY, renderWidth, renderHeight, new Color(1f, 1f, 1f, transparency))
       }
     }
     for(e <- field.fallingPieceSet) {

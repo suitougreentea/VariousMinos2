@@ -157,8 +157,8 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       for(iy <- field.filledLines; ix <- 0 until 10){
         field(ix, iy).id match {
           case 64 => bombList += Tuple3(ix, iy, false)
-          case 128 if(!bombList.contains(Tuple3(ix, iy - 1, true))) => bombList += Tuple3(ix, iy - 1, true)
-          case 192 => bombList += Tuple3(ix, iy, true)
+          case 65 if(!bombList.contains(Tuple3(ix, iy - 1, true))) => bombList += Tuple3(ix, iy - 1, true)
+          case 67 => bombList += Tuple3(ix, iy, true)
           case _ =>
         }
       }
@@ -179,13 +179,13 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
           for(iy <- yr; ix <- xr) {
             if(field(ix, iy).id == 64 && !bombList.contains(Tuple3(ix, iy, false))){
               bombListNew += Tuple3(ix, iy, false)
-            } else if(field(ix, iy).id == 128 && !bombList.contains(Tuple3(ix, iy - 1, true))) {
+            } else if(field(ix, iy).id == 65 && !bombList.contains(Tuple3(ix, iy - 1, true))) {
               bombListNew += Tuple3(ix, iy - 1, true)
-            } else if(field(ix, iy).id == 129 && !bombList.contains(Tuple3(ix - 1, iy - 1, true))) {
+            } else if(field(ix, iy).id == 66 && !bombList.contains(Tuple3(ix - 1, iy - 1, true))) {
               bombListNew += Tuple3(ix - 1, iy - 1, true)
-            } else if(field(ix, iy).id == 192 && !bombList.contains(Tuple3(ix, iy, true))) {
+            } else if(field(ix, iy).id == 67 && !bombList.contains(Tuple3(ix, iy, true))) {
               bombListNew += Tuple3(ix, iy, true)
-            } else if(field(ix, iy).id == 193 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
+            } else if(field(ix, iy).id == 68 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
               bombListNew += Tuple3(ix - 1, iy, true)
             } else {
               field(ix, iy) = new Block(0)
@@ -265,10 +265,10 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     def procedureWorking(executer: PhaseExecuter) {
       for(e <- makingBigBombSet){
         var (x, y) = e
-        field(x, y) = new Block(128)
-        field(x + 1, y) = new Block(129)
-        field(x, y - 1) = new Block(192)
-        field(x + 1, y - 1) = new Block(193)
+        field(x, y) = new Block(65)
+        field(x + 1, y) = new Block(66)
+        field(x, y - 1) = new Block(67)
+        field(x + 1, y - 1) = new Block(68)
       }
       makingBigBombSet = HashSet.empty
       executer.enterPhase(phaseMoving, true)
@@ -278,7 +278,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   def existBombLine: Boolean = {
     for(iy <- field.filledLines; ix <- 0 until 10){
       field(ix, iy).id match {
-        case 64 | 128 | 129 | 192 | 193 => return true
+        case 64 | 65 | 66 | 67 | 68 => return true
         case _ =>
       }
     }
@@ -405,5 +405,16 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     executer.exec()
     
     i.clearKeyPressedRecord()
+  }
+  
+  override def graphicId(block: Block): Int = {
+    var id = block.id
+    if(0 <= id && id < 64) id
+    else if(id == 64) 128
+    else if(id == 65) 129
+    else if(id == 66) 130
+    else if(id == 67) 193
+    else if(id == 68) 194
+    else id
   }
 }

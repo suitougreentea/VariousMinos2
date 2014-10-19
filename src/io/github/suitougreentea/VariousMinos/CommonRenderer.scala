@@ -4,10 +4,13 @@ import org.newdawn.slick.Color
 import org.newdawn.slick.Graphics
 
 trait CommonRenderer {
+  def graphicId(block: Block): Int = block.id
+  
   def drawBlock(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
     if(block == null) return
-    var sbx: Int = block.id % 64
-    var sby: Int = block.id / 64
+    var id = graphicId(block)
+    var sbx: Int = id % 64
+    var sby: Int = id / 64
     if (small) {
       
     } else {

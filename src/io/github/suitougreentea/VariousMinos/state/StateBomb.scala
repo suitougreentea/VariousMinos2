@@ -381,7 +381,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     Resource.frame.draw(456, 144)
     
     g.setColor(new Color(1f, 1f, 1f))
-    g.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
+    Resource.jpfont.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
         format(executer.currentPhase.id,
             executer.currentPosition.toString(),
             executer.timer,

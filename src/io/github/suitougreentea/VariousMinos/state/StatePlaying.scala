@@ -35,16 +35,16 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     g.translate(168, 160)
     Resource.boldfont.drawString("Select Style", 80, 16, TextAlign.CENTER)
     Resource.boldfont.drawString("Tetra", 16, 48)
-    Resource.boldfont.drawString("Bomb", 16, 64)
+    Resource.boldfont.drawString("Tetra-Classic/Endless", 16, 64)
     Resource.boldfont.drawString("Magic", 16, 80)
     Resource.boldfont.drawString("Spark", 16, 96)
     Resource.jpfont.drawString("爆破が備わったモードです", 0, 128)
     g.popTransform()
     Resource.frame.draw(456, 144)
-    wrapper1p.game.render(g)
+    //wrapper1p.game.render(g)
   }
 
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int) = {
-    wrapper1p.game.update()
+    //wrapper1p.game.update()
   }
 }

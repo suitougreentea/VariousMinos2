@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<stagefile version="0" type="BombPuzzle">
+  <stage>
+    <map>
+      <row>1,0,0,0,0,0,0,0,0,0</row>
+    </map>
+  </stage>
+</stagefile>

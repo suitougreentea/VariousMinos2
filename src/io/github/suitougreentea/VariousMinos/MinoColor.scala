@@ -4,6 +4,6 @@ trait MinoColor {
   def getMinoColor(minoId: Int) = 1
 }
 
-class MinoColorStandard {
-  
+class MinoColorStandard extends MinoColor {
+  override def getMinoColor(minoId: Int) = minoId + 1
 }

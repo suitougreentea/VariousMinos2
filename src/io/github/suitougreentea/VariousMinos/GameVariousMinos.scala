@@ -5,17 +5,14 @@ import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
-import javax.annotation.Resource
-import io.github.suitougreentea.VariousMinos.state.StateTetra
-import io.github.suitougreentea.VariousMinos.state.StateDebug
-import io.github.suitougreentea.VariousMinos.state.StateBomb
+import io.github.suitougreentea.VariousMinos.state._
 
 class GameVariousMinos(val name: String) extends StateBasedGame(name) {
   this.addState(new StateDebug(-1))
   this.addState(new StateLoading(0))
-  this.addState(new StateTetra(1))
-  this.addState(new StateBomb(2))
-  this.enterState(2)
+  this.addState(new StatePlaying(1))
+  this.addState(new StateTetra(2))
+  this.enterState(1)
 
   def initStatesList(gc: GameContainer) = {
     this.getState(-1).init(gc, this)   

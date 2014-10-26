@@ -36,7 +36,18 @@ class AngelCodeFontXML (fntPath: String){
     chars += id -> new Glyph(x, y, width, height, xoffset, yoffset, xadvance, page)
   }
   
-  def drawStringEmbedded(str: String, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)): Int = {
+  def measureString(str: String): Int = {
+    var cx = 0
+    for(c <- str){
+      val glyph = chars.getOrElse(c, null)
+      if(c != null){
+        cx += glyph.xadvance
+      }
+    }
+    cx
+  }
+  
+  def drawStringEmbedded(str: String, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)) {
     var cx = 0
     for(c <- str){
       val glyph = chars.getOrElse(c, null)
@@ -50,16 +61,19 @@ class AngelCodeFontXML (fntPath: String){
             glyph.x + glyph.width,
             glyph.y + glyph.height,
             color)
+        cx += glyph.xadvance
       }
-      cx += glyph.xadvance
     }
-    cx
   }
   
-  def drawString(str: String, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)) {
+  def drawString(str: String, x: Int, y: Int, align: TextAlign.Value = TextAlign.LEFT, color: Color = new Color(1f, 1f, 1f)) {
     var cy = 0
     for(s <- str.split("\n")){
-      drawStringEmbedded(s, x, y + cy, color)
+      align match {
+        case TextAlign.LEFT => drawStringEmbedded(s, x, y + cy, color)
+        case TextAlign.CENTER => drawStringEmbedded(s, x - (measureString(s) / 2), y + cy, color)
+        case TextAlign.RIGHT => drawStringEmbedded(s, x - measureString(s), y + cy, color)
+      }
       cy += lineHeight
     }
   }
@@ -67,4 +81,8 @@ class AngelCodeFontXML (fntPath: String){
 
 class Glyph(val x: Int, val y: Int, val width: Int, val height: Int, val xoffset: Int, val yoffset: Int, val xadvance: Int, val page: Image){
 
+}
+
+object TextAlign extends Enumeration {
+  val LEFT, CENTER, RIGHT = Value
 }

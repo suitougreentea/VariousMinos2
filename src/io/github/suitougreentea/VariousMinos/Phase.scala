@@ -30,18 +30,13 @@ trait Phase {
   def handleAfterAfter(executer: PhaseExecuter) {}
 }
 
-class PhaseExecuter (val game: StateBasedGame) {
+class PhaseExecuter (initialPhase: Phase) {
   var timer = 0
   var currentPosition = Position.BEFORE
   
-  private var _currentPhase : Phase = new Phase {
-    val id = -1
-    def beforeTime = 0
-    def afterTime = 0
-    def procedureWorking(executer: PhaseExecuter) = ???
-  }
-  
-  def currentPhase = _currentPhase
+  private var _currentPhase = initialPhase
+  def currentPhase: Phase = _currentPhase
+  println(currentPhase.id)
   
   private var _nextPhase : Phase = null
   

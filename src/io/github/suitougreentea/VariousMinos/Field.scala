@@ -17,6 +17,7 @@ class Field {
   var currentMinoX = 0
   var currentMinoY = 0
   
+  var minoColor: MinoColor = new MinoColorStandard()
   var generateMino = () => new Mino(0, 0, new Block(1))
   var nextMino: Array[Mino] = _
   var holdMino: Mino = null
@@ -148,10 +149,18 @@ class Field {
     for(iy <- 0 until height; ix <- 0 until 10){
       if(this(ix, iy).id > 0) fallingPieceSet += makeFallingPiece(new FallingPiece(), ix, iy)
     }
+    
+    for(e <- fallingPieceSet){
+      if(e.containsPersistentBlock) {
+        setFallingPiece(e)
+        fallingPieceSet -= e
+      }
+    }
   }
   
   def makeFallingPiece(piece: FallingPiece, x: Int, y: Int) : FallingPiece = {
     var result = piece
+    if(this(x, y).persistent) result.containsPersistentBlock = true
     result(x, y) = this(x, y)
     this(x, y) = new Block(0)
     if(this(x - 1, y).id > 0) result = makeFallingPiece(piece, x - 1, y)

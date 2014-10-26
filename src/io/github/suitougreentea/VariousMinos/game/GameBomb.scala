@@ -1,4 +1,4 @@
-package io.github.suitougreentea.VariousMinos.state
+package io.github.suitougreentea.VariousMinos.game
 
 import scala.beans.BeanProperty
 import io.github.suitougreentea.VariousMinos.Phase
@@ -17,8 +17,9 @@ import io.github.suitougreentea.VariousMinos.MinoList
 import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.Mino
 import scala.collection.mutable.HashSet
-/*
-class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRenderer {
+import io.github.suitougreentea.VariousMinos.Buttons
+
+class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
   var field = new Field()
   field.generateMino = () => {
     var id = Math.random() * 7 + 4 toInt
@@ -44,20 +45,20 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
       field.newMino()
     }
     def procedureWorking(executer: PhaseExecuter) {
-      var i = executer.game.getContainer().getInput()
-      if(i.isKeyPressed(Input.KEY_LEFT)){  
+      val c = wrapper.control
+      if(c.pressed(Buttons.LEFT)){  
         if(field.moveMinoLeft()) lockdownTimer = 0
         moveDirection = -1
         firstMoveTimer = 0
         moveCounter = 0
       }
-      if(i.isKeyPressed(Input.KEY_RIGHT)){
+      if(c.pressed(Buttons.RIGHT)){
         if(field.moveMinoRight()) lockdownTimer = 0
         moveDirection = 1
         firstMoveTimer = 0
         moveCounter = 0
       }
-	    if(i.isKeyDown(Input.KEY_LEFT)) {
+	    if(c.down(Buttons.LEFT)) {
     		if(moveDirection == -1) {
   		    if(firstMoveTimer == firstMoveTimerMax){
     		  	moveCounter += moveCounterDelta
@@ -70,7 +71,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   		    }
     		}
 	    }
-	    if(i.isKeyDown(Input.KEY_RIGHT)) {
+	    if(c.down(Buttons.RIGHT)) {
     		if(moveDirection == 1) {
   		    if(firstMoveTimer == firstMoveTimerMax){
       			moveCounter += moveCounterDelta
@@ -84,32 +85,31 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     		}
 	    }
       
-      if(i.isKeyDown(Input.KEY_DOWN)){
+      if(c.down(Buttons.DOWN)){
         softDropCounter += softDropCounterDelta
         while(softDropCounter >= 1) {
           field.moveMinoDown()
           softDropCounter -= 1          
         }
       }
-      if(i.isKeyPressed(Input.KEY_UP)) {
+      if(c.pressed(Buttons.UP)) {
         field.hardDrop()
         executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
       }
-      if(i.isKeyPressed(Input.KEY_Z)){
+      if(c.pressed(Buttons.A)){
         field.rotateMinoCCW()
         lockdownTimer = 0
       }
-      if(i.isKeyPressed(Input.KEY_X)){
+      if(c.pressed(Buttons.B)){
         field.rotateMinoCW()
         lockdownTimer = 0 
       }
-      if(i.isKeyPressed(Input.KEY_C)){
+      if(c.pressed(Buttons.C)){
 			  field.hold()
 			  fallCounter = 0
 			  softDropCounter = 0
 			  lockdownTimer = 0
       }
-      if(i.isKeyPressed(Input.KEY_A)) executer.enterPhase(this)
       
       fallCounter += fallCounterDelta
       while(fallCounter >= 1) {
@@ -288,10 +288,10 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     }
     return false
   }
-  
-  
-  
-  var executer: PhaseExecuter = _
+ 
+  var executer: PhaseExecuter = new PhaseExecuter(phaseMoving)
+  println(executer.currentPhase.id)
+  field.init()
   
   private var fallCounter = 0f
   private var fallCounterDelta = 1/60f
@@ -311,16 +311,10 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
   private var lastLines = 0
   private var chain = 0
   
-  def init(gc: GameContainer, sbg: StateBasedGame) = {
-    executer = new PhaseExecuter(sbg)
+  def update() {
+        executer.exec()
   }
-  
-  override def enter(gc: GameContainer, sbg: StateBasedGame) = {
-    field.init()
-    executer.enterPhase(phaseMoving) 
-  }
-
-  def render(gc: GameContainer, sbg: StateBasedGame, g: Graphics) = {
+  def render(g: Graphics) {
     //Resource.design.draw()
     g.setBackground(Color.darkGray)
     g.clear()
@@ -403,15 +397,7 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
             chain),
             472, 160)
   }
-
-  def update(gc: GameContainer, sbg: StateBasedGame, d: Int) = {
-    var i = gc.getInput()
-
-    executer.exec()
     
-    i.clearKeyPressedRecord()
-  }
-  
   override def graphicId(block: Block): Int = {
     var id = block.id
     if(0 <= id && id < 64) id
@@ -424,4 +410,3 @@ class StateBomb(@BeanProperty val ID: Int) extends BasicGameState with CommonRen
     else id
   }
 }
-*/

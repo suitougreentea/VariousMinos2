@@ -11,14 +11,12 @@ class GameVariousMinos(val name: String) extends StateBasedGame(name) {
   this.addState(new StateDebug(-1))
   this.addState(new StateLoading(0))
   this.addState(new StatePlaying(1))
-  this.addState(new StateTetra(2))
   this.enterState(1)
 
   def initStatesList(gc: GameContainer) = {
     this.getState(-1).init(gc, this)   
     this.getState(0).init(gc, this)   
     this.getState(1).init(gc, this)   
-    this.getState(2).init(gc, this)   
   }
 }
 

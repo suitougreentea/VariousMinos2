@@ -18,14 +18,19 @@ import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.Mino
 import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
+import io.github.suitougreentea.VariousMinos.DefaultSetting
 
-class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
-  var field = new Field()
+class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends Game with CommonRenderer {
+  val rule = defaultSetting.rule
+  var field = new Field(rule)
+
+  rule.randomizer.minoSet = HashSet(1, 3, 5, 7, 9)
+  
   field.generateMino = () => {
-    var id = Math.random() * 7 + 4 toInt
+    var id = rule.randomizer.next()
     var num = MinoList.numBlocks(id)
-    //var array = Array.fill(num)(new Block(field.minoColor.getMinoColor(id)))
-    var array = Array.fill(num)(new Block(73))
+    var array = Array.fill(num)(new Block(rule.color.get(id)))
+    //var array = Array.fill(num)(new Block(73))
     array(Math.random() * num toInt) = new Block(64)
     new Mino(id, 0, array)
   }
@@ -46,6 +51,22 @@ class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
     }
     def procedureWorking(executer: PhaseExecuter) {
       val c = wrapper.control
+      
+      fallCounter += fallCounterDelta
+      while(fallCounter >= 1) {
+        field.moveMinoDown()
+        fallCounter -= 1
+      }
+      
+      if(field.currentMinoY == field.ghostY) {
+        if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
+          field.hardDrop()
+          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+        }
+        lockdownTimer += 1
+        forceLockdownTimer += 1
+      }
+      
       if(c.pressed(Buttons.LEFT)){  
         if(field.moveMinoLeft()) lockdownTimer = 0
         moveDirection = -1
@@ -88,13 +109,24 @@ class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
       if(c.down(Buttons.DOWN)){
         softDropCounter += softDropCounterDelta
         while(softDropCounter >= 1) {
-          field.moveMinoDown()
+          if(field.currentMinoY == field.ghostY && rule.downKeyLock){
+            field.hardDrop()
+            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+          } else {
+            field.moveMinoDown()
+          }
           softDropCounter -= 1          
         }
       }
       if(c.pressed(Buttons.UP)) {
-        field.hardDrop()
-        executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+        if(rule.enableUpKey){
+          if(rule.upKeyLock){
+            field.hardDrop()
+            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+          } else {
+            field.currentMinoY = field.ghostY
+          }
+        }
       }
       if(c.pressed(Buttons.A)){
         field.rotateMinoCCW()
@@ -109,21 +141,6 @@ class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
 			  fallCounter = 0
 			  softDropCounter = 0
 			  lockdownTimer = 0
-      }
-      
-      fallCounter += fallCounterDelta
-      while(fallCounter >= 1) {
-        field.moveMinoDown()
-        fallCounter -= 1
-      }
-      
-      if(field.currentMinoY == field.ghostY) {
-        if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
-          field.hardDrop()
-          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
-        }
-        lockdownTimer += 1
-        forceLockdownTimer += 1
       }
     }
   }
@@ -366,7 +383,7 @@ class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
     
     g.pushTransform()
     g.translate(0, 80)
-    for(i <- 0 until 7) {
+    for(i <- 0 until rule.numNext) {
       drawMino(g)(field.nextMino(i))
       g.translate(96, 0)
     }
@@ -380,7 +397,7 @@ class GameBomb(val wrapper: GameWrapper) extends Game with CommonRenderer {
     Resource.frame.draw(456, 144)
     
     g.setColor(new Color(1f, 1f, 1f))
-    Resource.jpfont.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
+    Resource.boldfont.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
         format(executer.currentPhase.id,
             executer.currentPosition.toString(),
             executer.timer,

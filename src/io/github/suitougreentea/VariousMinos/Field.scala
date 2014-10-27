@@ -1,10 +1,11 @@
 package io.github.suitougreentea.VariousMinos
 
+import io.github.suitougreentea.VariousMinos.rule.Rule
 import scala.language.dynamics
 import scala.collection.mutable.ArraySeq
 import scala.collection.mutable.HashSet
 
-class Field {
+class Field(var rule: Rule) {
   private var _field = IndexedSeq.fill(30)(Array.fill(10)(new Block(0)))
   def field = _field
   
@@ -17,15 +18,12 @@ class Field {
   var currentMinoX = 0
   var currentMinoY = 0
   
-  var minoColor: MinoColor = new MinoColorStandard()
   var generateMino = () => new Mino(0, 0, new Block(1))
   var nextMino: Array[Mino] = _
   var holdMino: Mino = null
   var alreadyHolded = false
   
   var fallingPieceSet: HashSet[FallingPiece] = HashSet.empty
-  
-  var system: RotationSystem = new RotationSystemStandard()
   
   def init(){
     nextMino = Array.fill(7)(generateMino())
@@ -79,11 +77,11 @@ class Field {
   }
   
   def rotateMinoCW(): Boolean = {
-    system.rotateCW(this)
+    rule.rotation.rotateCW(this)
   }
 
   def rotateMinoCCW(): Boolean = {
-    system.rotateCCW(this)
+    rule.rotation.rotateCCW(this)
   }
   
   def hardDrop() {
@@ -104,19 +102,21 @@ class Field {
   }
   
   def hold(){
-    if(!alreadyHolded){
-      if(holdMino == null){
-        // TODO: Revert rotation
-        holdMino = currentMino
-        newMino()
-      } else {
-        var temp = currentMino
-        currentMino = holdMino
-        holdMino = temp
-        currentMinoX = 2
-        currentMinoY = 18
+    if(rule.enableHold) {
+      if(!alreadyHolded){
+        if(holdMino == null){
+          // TODO: Revert rotation
+          holdMino = currentMino
+          newMino()
+        } else {
+          var temp = currentMino
+          currentMino = holdMino
+          holdMino = temp
+          currentMinoX = 2
+          currentMinoY = 18
+        }
+        alreadyHolded = true
       }
-      alreadyHolded = true
     }
   }
   

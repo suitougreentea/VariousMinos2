@@ -1,6 +1,8 @@
-package io.github.suitougreentea.VariousMinos
+package io.github.suitougreentea.VariousMinos.rule
 
-class RotationSystemStandard extends RotationSystem {
+import io.github.suitougreentea.VariousMinos.Field
+
+class RotationSystemClassic extends RotationSystem {
   var offsetCW44 = Array((-1, 0), (0, 1), (1, 0), (0, -1))
   var offsetCCW44 = Array((0, 1), (1, 0), (0, -1), (-1, 0))
   

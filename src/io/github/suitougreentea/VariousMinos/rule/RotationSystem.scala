@@ -1,4 +1,6 @@
-package io.github.suitougreentea.VariousMinos
+package io.github.suitougreentea.VariousMinos.rule
+
+import io.github.suitougreentea.VariousMinos.Field
 
 trait RotationSystem {
   def rotateCW(field: Field): Boolean = {

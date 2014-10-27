@@ -18,7 +18,7 @@ object Resource {
     block = loadImage("image/block.png")
     bomb = loadImage("image/bomb.png")
     
-    jpfont = new AngelCodeFontXML("res/font/jpfont16.fnt")
+    //jpfont = new AngelCodeFontXML("res/font/jpfont16.fnt")
     boldfont = new AngelCodeFontXML("res/font/16bold.fnt")
   }
   

@@ -5,6 +5,7 @@ import scala.xml.XML
 import org.newdawn.slick.Image
 import scala.collection.mutable.HashMap
 import org.newdawn.slick.Color
+import scala.xml.Elem
 
 class AngelCodeFontXML (fntPath: String){
   val fntFile = new File(fntPath)
@@ -77,6 +78,18 @@ class AngelCodeFontXML (fntPath: String){
       cy += lineHeight
     }
   }
+  
+  /*def drawString(str: Elem, x: Int, y: Int, align: TextAlign.Value = TextAlign.LEFT, color: Color = new Color(1f, 1f, 1f)) {
+    var cy = 0
+    for(s <- str.split("\n")){
+      align match {
+        case TextAlign.LEFT => drawStringEmbedded(s, x, y + cy, color)
+        case TextAlign.CENTER => drawStringEmbedded(s, x - (measureString(s) / 2), y + cy, color)
+        case TextAlign.RIGHT => drawStringEmbedded(s, x - measureString(s), y + cy, color)
+      }
+      cy += lineHeight
+    }
+  }*/
 }
 
 class Glyph(val x: Int, val y: Int, val width: Int, val height: Int, val xoffset: Int, val yoffset: Int, val xadvance: Int, val page: Image){

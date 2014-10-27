@@ -19,7 +19,7 @@ class RuleClassic extends Rule {
   val randomizer = new RandomizerRandom()
   val rotation = new RotationSystemClassic()
   val color = new MinoColorClassic()
-  val spawn = new SpawnRuleStandard()
+  val spawn = new SpawnRuleClassic()
   override val enableUpKey = false
   override val upKeyLock = true
   override val downKeyLock = true

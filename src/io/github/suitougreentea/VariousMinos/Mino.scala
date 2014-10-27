@@ -5,19 +5,19 @@ class Mino (val minoId: Int, defaultRotationState: Int, blocks: Array[Block]){
   private var _rotationState = 0
   def rotationState = _rotationState
   
-  defaultRotationState match {
-    case 0 =>
-    case 1 => rotateCW()
-    case 2 => rotateDouble()
-    case 3 => rotateCCW()
-  }
-  
   if(minoId >= 0) {
     val _list = MinoList(minoId)
     for (i <- 0 until _list.length) {
       var (x, y) = _list(i)
       this(x, y) = blocks(i)
     } 
+  }
+  
+  defaultRotationState match {
+    case 0 =>
+    case 1 => rotateCW()
+    case 2 => rotateDouble()
+    case 3 => rotateCCW()
   }
   
   def this (minoId: Int, defaultRotationState: Int, block: Block = new Block(1)) = {

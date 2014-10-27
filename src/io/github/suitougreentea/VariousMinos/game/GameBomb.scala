@@ -40,7 +40,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     var array = Array.fill(num)(new Block(rule.color.get(id)))
     //var array = Array.fill(num)(new Block(73))
     array(Math.random() * num toInt) = new Block(64)
-    new Mino(id, 0, array)
+    new Mino(id, rule.spawn.getRotation(id), array)
   }
   
   val bombSize = Array ((3, 0), (3, 1), (3, 2), (3, 3), (4, 4), (4, 4), (5, 5), (5, 5), (6, 6), (6, 6), (7, 7), (7, 7), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8))

@@ -94,8 +94,9 @@ class Field(var rule: Rule) {
   
   def newMino(){
     currentMino = nextMino(0)
-    currentMinoX = 2
-    currentMinoY = 18
+    var (x, y) = rule.spawn.getPosition(currentMino.minoId)
+    currentMinoX = x
+    currentMinoY = y
     for(i <- 0 until 6) nextMino(i) = nextMino(i+1)
     nextMino(6) = generateMino()
     alreadyHolded = false
@@ -105,16 +106,23 @@ class Field(var rule: Rule) {
     if(rule.enableHold) {
       if(!alreadyHolded){
         if(holdMino == null){
-          // TODO: Revert rotation
           holdMino = currentMino
           newMino()
         } else {
           var temp = currentMino
           currentMino = holdMino
           holdMino = temp
-          currentMinoX = 2
-          currentMinoY = 18
+          var (x, y) = rule.spawn.getPosition(currentMino.minoId)
+          currentMinoX = x
+          currentMinoY = y
         }
+        (holdMino.rotationState - rule.spawn.getRotation(holdMino.minoId) + 4) % 4 match {
+          case 0 => 
+          case 1 => holdMino.rotateCCW()
+          case 2 => holdMino.rotateDouble()
+          case 3 => holdMino.rotateCW()
+        }
+        
         alreadyHolded = true
       }
     }

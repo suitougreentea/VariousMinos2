@@ -1,9 +1,11 @@
 package io.github.suitougreentea.VariousMinos.rule
 
 trait SpawnRule {
-  def get(minoId: Int): (Int, Int, Int) = (2, 18, 0)
+  def getPosition(minoId: Int): (Int, Int) = (2, 18)
+  def getRotation(minoId: Int): Int = 0
 }
 
-class SpawnRuleStandard extends SpawnRule {
-  override def get(minoId: Int) = (0, 0, 2)
+class SpawnRuleClassic extends SpawnRule {
+  override def getPosition(minoId: Int) = (2, 18)
+  override def getRotation(minoId: Int) = 2
 }

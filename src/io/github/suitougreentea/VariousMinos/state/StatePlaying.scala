@@ -16,14 +16,18 @@ import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.game.Game
 import io.github.suitougreentea.VariousMinos.rule.RuleClassic
 import io.github.suitougreentea.VariousMinos.DefaultSetting
+import io.github.suitougreentea.VariousMinos.StageLoader
+import io.github.suitougreentea.VariousMinos.game.HandlerBombContest
+import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   val wrapper1p = new GameWrapper {
     var _control: Control = null
     def control = _control
     var game: Game = null
-    def gameOver() {
-      
+    def exit(code: Int) {
+      phase = 0
+      game = null
     }
   }
   
@@ -111,6 +115,10 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   }
   
   def startGame(mode: Int, rule: Int){
-    wrapper1p.game = new GameBomb(wrapper1p, new DefaultSetting(new RuleClassic()))
+    var loader = new StageLoader()
+    loader.load()
+    var defaultSetting = new DefaultSettingBomb(new RuleClassic(), new HandlerBombContest())
+    defaultSetting.field = loader(0).field
+    wrapper1p.game = new GameBomb(wrapper1p, defaultSetting)
   }
 }

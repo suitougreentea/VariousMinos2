@@ -3,20 +3,22 @@
   <config>
     <rule type="ClassicPlus" force="false" />
   </config>
-  <stage>
-    <config>
-      <speed fall="1" lock="60" />
-      <mino num="100">
-        <list>4,5,6,7,8,9,10</list>
-        <bomb frequency="10" offset="0" />
-        <white frequency="10" offset="3" level="2" />
-        <black frequency="10" offset="6" level="2" />
-      </mino>
-    </config>
-    <map>
-      <row>1,0,0,0,64,64,0,0,0,1</row>
-      <row>1,1,0,0,64,64,0,0,1,1</row>
-      <row>0,1,1,1,1,1,1,1,1,0</row>
-    </map>
-  </stage>
+  <stages>
+	<stage>
+	  <config>
+	    <speed fall="1" lock="60" />
+	    <mino num="100">
+	      <list>4,5,6,7,8,9,10</list>
+	      <bomb frequency="10" offset="0" />
+	      <white frequency="10" offset="3" level="2" />
+	      <black frequency="10" offset="6" level="2" />
+	    </mino>
+	  </config>
+	  <map>
+	    <row>1,0,0,0,64,64,0,0,0,1</row>
+	    <row>1,1,0,0,64,64,0,0,1,1</row>
+	    <row>0,1,1,1,1,1,1,1,1,0</row>
+	  </map>
+	</stage>
+  </stages>
 </stagefile>

@@ -36,7 +36,7 @@ class PhaseExecuter (initialPhase: Phase) {
   
   private var _currentPhase = initialPhase
   def currentPhase: Phase = _currentPhase
-  println(currentPhase.id)
+  currentPhase.handleBeforeBefore(this)
   
   private var _nextPhase : Phase = null
   

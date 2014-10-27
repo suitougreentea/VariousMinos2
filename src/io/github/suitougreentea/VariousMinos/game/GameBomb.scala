@@ -18,11 +18,19 @@ import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.Mino
 import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
-import io.github.suitougreentea.VariousMinos.DefaultSetting
+import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 
-class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends Game with CommonRenderer {
+class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
+  val _this = this
   val rule = defaultSetting.rule
+  val handler = defaultSetting.handler
   var field = new Field(rule)
+  
+  if(defaultSetting.field != null) {
+    for(iy <- 0 until defaultSetting.field.size; ix <- 0 until 10){
+      field(ix, iy) = new Block(defaultSetting.field(iy)(ix))
+    }
+  }
 
   rule.randomizer.minoSet = HashSet(1, 3, 5, 7, 9)
   
@@ -37,6 +45,30 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
   
   val bombSize = Array ((3, 0), (3, 1), (3, 2), (3, 3), (4, 4), (4, 4), (5, 5), (5, 5), (6, 6), (6, 6), (7, 7), (7, 7), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8))
   
+  val phaseReady : Phase = new Phase {
+    val id = -1
+    val beforeTime = 10
+    val afterTime = 30
+    
+    override def handleBeforeBefore(executer: PhaseExecuter){
+      searchBigBomb()
+    }
+    
+    override def procedureBefore(executer: PhaseExecuter){
+      if(makingBigBombSet.size == 0) executer.moveToWorking()
+      else super.procedureBefore(executer)
+    }
+    
+    override def handleAfterBefore(executer: PhaseExecuter){
+      makeBigBomb()
+    }
+    
+    def procedureWorking(executer: PhaseExecuter){
+      val c = wrapper.control
+      if(c.pressed(Buttons.A)) executer.enterPhase(phaseMoving, true)
+    }
+  }
+  
   val phaseMoving : Phase = new Phase {
     val id = 0
     val beforeTime = 0
@@ -48,6 +80,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
 			forceLockdownTimer = 0
 			lastLines = field.filledLines.length
       field.newMino()
+      if(field.checkHit()) handler.stuck(_this)
     }
     def procedureWorking(executer: PhaseExecuter) {
       val c = wrapper.control
@@ -263,11 +296,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
     }
   }
   var makingBigBombSet: HashSet[(Int, Int)] = HashSet.empty
-  val phaseMakingBigBomb : Phase = new Phase {
-    val id = 4
-    val beforeTime = 10
-    val afterTime = 10
-    override def handleBeforeBefore(executer: PhaseExecuter){
+  def searchBigBomb() {
       // 上が優先される
       for(iy <- field.height - 1 to 0 by -1; ix <- 0 until 10){
         if(field(ix, iy).id == 64){
@@ -278,12 +307,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
           }
         }
       }
-    }
-    override def procedureBefore(executer: PhaseExecuter){
-      if(makingBigBombSet.size == 0) executer.enterPhase(phaseMoving, false)
-      else super.procedureBefore(executer)
-    }
-    def procedureWorking(executer: PhaseExecuter) {
+  }
+  def makeBigBomb() {
       for(e <- makingBigBombSet){
         var (x, y) = e
         field(x, y) = new Block(65)
@@ -292,6 +317,28 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
         field(x + 1, y - 1) = new Block(68)
       }
       makingBigBombSet = HashSet.empty
+  }
+  val phaseMakingBigBomb : Phase = new Phase {
+    val id = 4
+    val beforeTime = 10
+    val afterTime = 10
+    override def handleBeforeBefore(executer: PhaseExecuter){
+      var flag = false
+      for(iy <- 0 until field.height; ix <- 0 until 10){
+        if(field(ix, iy).id != 0) flag = true
+      }
+      if(flag){
+        searchBigBomb()
+      } else {
+        handler.allClear(_this)
+      }
+    }
+    override def procedureBefore(executer: PhaseExecuter){
+      if(makingBigBombSet.size == 0) executer.enterPhase(phaseMoving, false)
+      else super.procedureBefore(executer)
+    }
+    def procedureWorking(executer: PhaseExecuter) {
+      makeBigBomb()
       executer.enterPhase(phaseMoving, true)
     }
   }
@@ -306,8 +353,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSetting) extends
     return false
   }
  
-  var executer: PhaseExecuter = new PhaseExecuter(phaseMoving)
-  println(executer.currentPhase.id)
+  var executer: PhaseExecuter = new PhaseExecuter(phaseReady)
   field.init()
   
   private var fallCounter = 0f

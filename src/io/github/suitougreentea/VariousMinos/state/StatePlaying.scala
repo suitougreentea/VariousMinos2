@@ -21,6 +21,9 @@ import io.github.suitougreentea.VariousMinos.game.HandlerBombContest
 import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 import io.github.suitougreentea.VariousMinos.rule.RuleStandard
 import io.github.suitougreentea.VariousMinos.game.HandlerBombEndless
+import io.github.suitougreentea.VariousMinos.rule.RuleClassicPlus
+import io.github.suitougreentea.VariousMinos.rule.RuleVariantClassic
+import io.github.suitougreentea.VariousMinos.rule.RuleVariantPlus
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   val wrapper1p = new GameWrapper {
@@ -72,10 +75,10 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
           Resource.boldfont.drawString(">", 16, 64 + cursor * 32, color = new Color(1f, 1f, 0f))
           Resource.boldfont.drawString("Select Rule", 80, 16, TextAlign.CENTER, new Color(0.2f, 1f, 0.2f))
           Resource.boldfont.drawString("Classic", 32, 64)
-          Resource.boldfont.drawString("ClassicPlus", 32, 96, color = new Color(0.3f, 0.3f, 0.3f))
+          Resource.boldfont.drawString("ClassicPlus", 32, 96)
           Resource.boldfont.drawString("Standard", 32, 128)
-          Resource.boldfont.drawString("VariantClassic", 32, 160, color = new Color(0.3f, 0.3f, 0.3f))
-          Resource.boldfont.drawString("VariantPlus", 32, 192, color = new Color(0.3f, 0.3f, 0.3f))
+          Resource.boldfont.drawString("VariantClassic", 32, 160)
+          Resource.boldfont.drawString("VariantPlus", 32, 192)
         }
         case _ =>
       }
@@ -104,7 +107,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
           }
           case 1 =>
             cursor match {
-              case 0 | 2 => {
+              case 0 | 1 | 2 | 3 | 4 => {
                 rule = cursor
                 startGame(mode, rule)
                 phase = -1
@@ -129,7 +132,10 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     
     var ruleClass = rule match {
       case 0 => new RuleClassic()
+      case 1 => new RuleClassicPlus()
       case 2 => new RuleStandard()
+      case 3 => new RuleVariantClassic()
+      case 4 => new RuleVariantPlus()
     }
     
     var defaultSetting = new DefaultSettingBomb(ruleClass, handler)

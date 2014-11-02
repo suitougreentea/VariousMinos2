@@ -28,9 +28,34 @@ class RuleClassic extends Rule {
   override val enableInitialRotate = false
 }
 
+class RuleClassicPlus extends RuleClassic {
+  override val enableUpKey = true
+  override val upKeyLock = true
+  override val downKeyLock = false
+  override val enableHold = true
+  override val numNext = 7
+}
+
 class RuleStandard extends Rule {
   val randomizer = new RandomizerBag()
   val rotation = new RotationSystemStandard()
   val color = new MinoColorStandard()
   val spawn = new SpawnRuleStandard()
+}
+
+class RuleVariantClassic extends Rule {
+  val randomizer = new RandomizerBag()
+  val rotation = new RotationSystemVariantClassic()
+  val color = new MinoColorVariant()
+  val spawn = new SpawnRuleVariant()
+  override val upKeyLock = false
+  override val downKeyLock = true
+  override val enableHold = false
+  override val numNext = 1
+}
+
+class RuleVariantPlus extends RuleVariantClassic {
+  override val rotation = new RotationSystemVariantPlus()
+  override val enableHold = true
+  override val numNext = 7
 }

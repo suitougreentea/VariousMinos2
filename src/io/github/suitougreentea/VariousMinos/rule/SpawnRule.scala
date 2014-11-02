@@ -26,3 +26,8 @@ class SpawnRuleStandard extends SpawnRule {
   }
   override def getRotation(minoId: Int) = 0
 }
+
+class SpawnRuleVariant extends SpawnRule {
+  override def getPosition(minoId: Int) = (2, 18)
+  override def getRotation(minoId: Int) = 2
+}

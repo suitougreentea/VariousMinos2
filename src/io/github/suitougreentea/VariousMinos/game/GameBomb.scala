@@ -23,7 +23,8 @@ import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
   val _this = this
   val rule = defaultSetting.rule
-  rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7))
+  //rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28))
+  rule.randomizer.init(HashSet(4, 5, 6, 7, 8, 9, 10))
   
   val handler = defaultSetting.handler
   var field = new Field(rule)
@@ -67,38 +68,74 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
       val c = wrapper.control
       if(c.pressed(Buttons.A)) executer.enterPhase(phaseMoving, true)
     }
+    
+    override def procedureAfter(executer: PhaseExecuter) {
+      super.procedureAfter(executer)
+      val c = wrapper.control
+      if(c.down(Buttons.LEFT)) {
+        moveDirection = -1
+    	  if(firstMoveTimer != firstMoveTimerMax) firstMoveTimer += 1	
+	    }
+	    if(c.down(Buttons.RIGHT)) {
+	      moveDirection = 1
+    		if(firstMoveTimer != firstMoveTimerMax) firstMoveTimer += 1
+	    }
+    }
   }
   
   val phaseMoving : Phase = new Phase {
     val id = 0
-    val beforeTime = 0
+    val beforeTime = 10
     val afterTime = 0
     override def handleAfterBefore(executer: PhaseExecuter) {
+      val c = wrapper.control
+      
       fallCounter = 0
 			softDropCounter = 0
 			lockdownTimer = 0
 			forceLockdownTimer = 0
 			lastLines = field.filledLines.length
       field.newMino()
+      
+      if(c.down(Buttons.C) && !c.pressed(Buttons.C) && rule.enableInitialHold){
+        field.hold()
+      }
+      if(c.down(Buttons.LEFT) && !c.pressed(Buttons.LEFT) && rule.enableInitialMove){
+        field.moveMinoLeft()
+      }
+      if(c.down(Buttons.RIGHT) && !c.pressed(Buttons.RIGHT) && rule.enableInitialMove){
+        field.moveMinoRight()
+      }
+      if(c.down(Buttons.A) && !c.pressed(Buttons.A) && rule.enableInitialRotate){
+        field.rotateMinoCCW()
+      }
+      if(c.down(Buttons.B) && !c.pressed(Buttons.B) && rule.enableInitialRotate){
+        field.rotateMinoCW()
+      }
+      
       if(field.checkHit()) handler.stuck(_this)
-    }
-    def procedureWorking(executer: PhaseExecuter) {
-      val c = wrapper.control
       
       fallCounter += fallCounterDelta
       while(fallCounter >= 1) {
         field.moveMinoDown()
         fallCounter -= 1
       }
+    }
+    override def procedureBefore(executer: PhaseExecuter) {
+      super.procedureBefore(executer)
+      val c = wrapper.control
       
-      if(field.currentMinoY == field.ghostY) {
-        if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
-          field.hardDrop()
-          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
-        }
-        lockdownTimer += 1
-        forceLockdownTimer += 1
-      }
+      if(c.down(Buttons.LEFT)) {
+        moveDirection = -1
+    	  if(firstMoveTimer != firstMoveTimerMax) firstMoveTimer += 1	
+	    }
+	    if(c.down(Buttons.RIGHT)) {
+	      moveDirection = 1
+    		if(firstMoveTimer != firstMoveTimerMax) firstMoveTimer += 1
+	    }
+    }
+    def procedureWorking(executer: PhaseExecuter) {
+      val c = wrapper.control
       
       if(c.pressed(Buttons.LEFT)){  
         if(field.moveMinoLeft()) lockdownTimer = 0
@@ -174,6 +211,20 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
 			  fallCounter = 0
 			  softDropCounter = 0
 			  lockdownTimer = 0
+      }
+      
+      fallCounter += fallCounterDelta
+      while(fallCounter >= 1) {
+        field.moveMinoDown()
+        fallCounter -= 1
+      }
+      if(field.currentMinoY == field.ghostY) {
+        if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
+          field.hardDrop()
+          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+        }
+        lockdownTimer += 1
+        forceLockdownTimer += 1
       }
     }
   }
@@ -357,7 +408,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   field.init()
   
   private var fallCounter = 0f
-  private var fallCounterDelta = 1/60f
+  private var fallCounterDelta = 100f
   private var softDropCounter = 0f
   private var softDropCounterDelta = 1f
   private var lockdownTimer = 0

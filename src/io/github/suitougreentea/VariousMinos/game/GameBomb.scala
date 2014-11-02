@@ -23,6 +23,8 @@ import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
   val _this = this
   val rule = defaultSetting.rule
+  rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7))
+  
   val handler = defaultSetting.handler
   var field = new Field(rule)
   
@@ -31,8 +33,6 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
       field(ix, iy) = new Block(defaultSetting.field(iy)(ix))
     }
   }
-
-  rule.randomizer.minoSet = HashSet(1, 3, 5, 7, 9)
   
   field.generateMino = () => {
     var id = rule.randomizer.next()

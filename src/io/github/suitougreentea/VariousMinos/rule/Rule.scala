@@ -27,3 +27,10 @@ class RuleClassic extends Rule {
   override val numNext = 1
   override val enableInitialRotate = false
 }
+
+class RuleStandard extends Rule {
+  val randomizer = new RandomizerBag()
+  val rotation = new RotationSystemStandard()
+  val color = new MinoColorStandard()
+  val spawn = new SpawnRuleStandard()
+}

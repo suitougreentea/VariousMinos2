@@ -49,5 +49,6 @@ class RandomizerBag() extends Randomizer {
   def resetBag() {
     bag = Array.fill(minoSet.size)(false)
     bagRemain = bag.length
+    println(bagRemain)
   }
 }

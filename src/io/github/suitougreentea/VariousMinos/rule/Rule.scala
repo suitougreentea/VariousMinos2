@@ -8,7 +8,7 @@ trait Rule {
   val enableUpKey = true
   val upKeyLock = true
   val downKeyLock = false
-  val enableHold = true
+  var enableHold = true
   val numNext = 7
   val enableInitialHold = true
   val enableInitialMove = false
@@ -23,7 +23,7 @@ class RuleClassic extends Rule {
   override val enableUpKey = false
   override val upKeyLock = true
   override val downKeyLock = true
-  override val enableHold = false
+  enableHold = false
   override val numNext = 1
   override val enableInitialRotate = false
 }
@@ -32,7 +32,7 @@ class RuleClassicPlus extends RuleClassic {
   override val enableUpKey = true
   override val upKeyLock = true
   override val downKeyLock = false
-  override val enableHold = true
+  enableHold = true
   override val numNext = 7
 }
 
@@ -50,12 +50,12 @@ class RuleVariantClassic extends Rule {
   val spawn = new SpawnRuleVariant()
   override val upKeyLock = false
   override val downKeyLock = true
-  override val enableHold = false
+  enableHold = false
   override val numNext = 1
 }
 
 class RuleVariantPlus extends RuleVariantClassic {
   override val rotation = new RotationSystemVariantPlus()
-  override val enableHold = true
+  enableHold = true
   override val numNext = 7
 }

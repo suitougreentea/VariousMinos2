@@ -19,29 +19,19 @@ import io.github.suitougreentea.VariousMinos.Mino
 import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
+import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
 
 class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
   val _this = this
   val rule = defaultSetting.rule
-  rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28))
-  //rule.randomizer.init(HashSet(4, 5, 6, 7, 8, 9, 10))
-  
   val handler = defaultSetting.handler
   var field = new Field(rule)
   
+  field.generator = defaultSetting.generator
   if(defaultSetting.field != null) {
     for(iy <- 0 until defaultSetting.field.size; ix <- 0 until 10){
       field(ix, iy) = new Block(defaultSetting.field(iy)(ix))
     }
-  }
-  
-  field.generateMino = () => {
-    var id = rule.randomizer.next()
-    var num = MinoList.numBlocks(id)
-    var array = Array.fill(num)(new Block(rule.color.get(id)))
-    //var array = Array.fill(num)(new Block(73))
-    array(Math.random() * num toInt) = new Block(64)
-    new Mino(id, rule.spawn.getRotation(id), array)
   }
   
   val bombSize = Array ((3, 0), (3, 1), (3, 2), (3, 3), (4, 4), (4, 4), (5, 5), (5, 5), (6, 6), (6, 6), (7, 7), (7, 7), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8))
@@ -95,7 +85,11 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
 			lockdownTimer = 0
 			forceLockdownTimer = 0
 			lastLines = field.filledLines.length
-      field.newMino()
+      if(field.nextMino(0) == null){
+        handler.noNewMino(_this)
+      } else {
+        field.newMino()
+      }
       
       if(c.down(Buttons.C) && !c.pressed(Buttons.C) && rule.enableInitialHold){
         field.hold()
@@ -478,13 +472,13 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     }
     g.popTransform()
     
-    if(rule.numNext >= 1) {
+    if(rule.numNext >= 1 && field.nextMino(0) != null) {
       g.pushTransform()
       g.translate(216, 136)
       drawNextMino(g)(field.nextMino(0))
       g.popTransform()
     }
-    if(rule.numNext >= 2) {    
+    if(rule.numNext >= 2 && field.nextMino(1) != null) {    
       g.pushTransform()
       g.translate(304, 128)
       drawNextMino(g)(field.nextMino(1), true)
@@ -493,7 +487,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     g.pushTransform()
     g.translate(352, 128)
     for(i <- 2 until rule.numNext){
-      drawNextMino(g)(field.nextMino(i), true)
+      if(field.nextMino(i) != null) drawNextMino(g)(field.nextMino(i), true)
       g.translate(0, 32)      
     }
     g.popTransform()

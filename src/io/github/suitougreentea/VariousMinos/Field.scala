@@ -18,16 +18,33 @@ class Field(var rule: Rule) {
   var currentMinoX = 0
   var currentMinoY = 0
   
-  var generateMino = () => new Mino(0, 0, new Block(1))
-  var nextMino: Array[Mino] = _
+  var generator: MinoGenerator = _
+  private var _nextMino: Array[Mino] = _
+  
+  def nextMino(i: Int) : Mino = {
+    if(generator.infinite){
+      if(0 <= i && i < 7){
+        _nextMino(i) 
+      } else {
+        null
+      }
+    } else {
+      val gen = generator.asInstanceOf[MinoGeneratorFinite]
+      if(0 <= i && i < gen.list.size){
+        gen.list(i)
+      } else {
+        null
+      }
+    }
+  }
+  
   var holdMino: Mino = null
   var alreadyHolded = false
   
   var fallingPieceSet: HashSet[FallingPiece] = HashSet.empty
   
   def init(){
-    nextMino = Array.fill(7)(generateMino())
-    newMino()
+    if(generator.infinite) _nextMino = Array.fill(7)(generator.next())
   }
   
   def ghostY: Int = {
@@ -93,12 +110,20 @@ class Field(var rule: Rule) {
   }
   
   def newMino(){
-    currentMino = nextMino(0)
+    if(generator.infinite){
+      currentMino = nextMino(0)
+      for(i <- 0 until 6) _nextMino(i) = nextMino(i + 1)
+      _nextMino(6) = generator.next()
+    } else {
+      val gen = generator.asInstanceOf[MinoGeneratorFinite]
+      currentMino = gen.list(0)
+      for(i <- 0 until gen.list.size - 1) gen.list(i) = gen.list(i + 1)
+      gen.list(gen.list.size - 1) = null
+    }
+    
     var (x, y) = rule.spawn.getPosition(currentMino.minoId)
     currentMinoX = x
     currentMinoY = y
-    for(i <- 0 until 6) nextMino(i) = nextMino(i+1)
-    nextMino(6) = generateMino()
     alreadyHolded = false
   }
   

@@ -24,6 +24,11 @@ import io.github.suitougreentea.VariousMinos.game.HandlerBombEndless
 import io.github.suitougreentea.VariousMinos.rule.RuleClassicPlus
 import io.github.suitougreentea.VariousMinos.rule.RuleVariantClassic
 import io.github.suitougreentea.VariousMinos.rule.RuleVariantPlus
+import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
+import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombInfinite
+import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombFinite
+import io.github.suitougreentea.VariousMinos.MinoGeneratorBombFinite
+import scala.collection.mutable.HashSet
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   val wrapper1p = new GameWrapper {
@@ -67,7 +72,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
           Resource.boldfont.drawString("Select Mode", 80, 16, TextAlign.CENTER, new Color(1f, 0.2f, 0.8f))
           Resource.boldfont.drawString("Endless", 32, 64)
           Resource.boldfont.drawString("Contest", 32, 96)
-          Resource.boldfont.drawString("Puzzle", 32, 128, color = new Color(0.3f, 0.3f, 0.3f))
+          Resource.boldfont.drawString("Puzzle", 32, 128)
           Resource.boldfont.drawString("Master", 32, 160, color = new Color(0.3f, 0.3f, 0.3f))
           Resource.boldfont.drawString("Survival", 32, 192, color = new Color(0.3f, 0.3f, 0.3f))
         }
@@ -97,7 +102,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
         phase match {
           case 0 => {
             cursor match {
-              case 0 | 1 => {
+              case 0 | 1 | 2 => {
                 mode = cursor
                 phase = 1
                 cursor = 0
@@ -128,6 +133,9 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
       case 1 => {
         new HandlerBombContest()
       }
+      case 2 => {
+        new HandlerBombContest()
+      }
     }
     
     var ruleClass = rule match {
@@ -138,14 +146,25 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
       case 4 => new RuleVariantPlus()
     }
     
-    var defaultSetting = new DefaultSettingBomb(ruleClass, handler)
+    var defaultSetting: DefaultSettingBomb = null
     
-    if(mode == 1){
-      var loader = new StageLoader()
-      loader.load()
-      defaultSetting.field = loader(0).field
+    mode match {
+      case 0 => {
+        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombInfinite(ruleClass, new MinoGeneratorConfigBombInfinite(HashSet(4, 5, 6, 7, 8, 9, 10))))
+      }
+      case 1 => {
+        var loader = new StageLoader("stage/contest.vms")
+        loader.load()
+        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombInfinite(ruleClass, loader(0).mino.asInstanceOf[MinoGeneratorConfigBombInfinite]))
+        defaultSetting.field = loader(0).field  
+      }
+      case 2 => {
+        var loader = new StageLoader("stage/puzzle.vms")
+        loader.load()
+        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombFinite(ruleClass, loader(0).mino.asInstanceOf[MinoGeneratorConfigBombFinite]))
+        defaultSetting.field = loader(0).field 
+      }
     }
-    
     wrapper1p.game = new GameBomb(wrapper1p, defaultSetting)
   }
 }

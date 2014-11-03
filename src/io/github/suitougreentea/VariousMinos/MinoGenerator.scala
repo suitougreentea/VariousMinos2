@@ -19,7 +19,6 @@ trait MinoGeneratorFinite extends MinoGenerator {
 }
 
 class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigBombInfinite) extends MinoGeneratorInfinite {
-  println(config.set.toString())
   rule.randomizer.init(config.set)
   def next() = {
     var id = rule.randomizer.next()

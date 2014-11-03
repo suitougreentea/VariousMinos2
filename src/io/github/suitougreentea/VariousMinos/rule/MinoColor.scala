@@ -21,6 +21,6 @@ class MinoColorVariant extends MinoColor {
   val color = Array(
       2, 2, 2, 8, 
       2, 26, 5, 8, 32, 20, 14,
-      14, 14, 2, 5, 26, 14, 32, 26, 5, 20, 8, 8, 8, 8, 20, 20, 14, 32)
+      32, 14, 2, 5, 26, 14, 32, 26, 5, 20, 8, 8, 8, 8, 20, 20, 14, 32)
   override def get(minoId: Int) = color(minoId)
 }

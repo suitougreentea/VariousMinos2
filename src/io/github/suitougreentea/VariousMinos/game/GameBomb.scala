@@ -23,8 +23,8 @@ import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
   val _this = this
   val rule = defaultSetting.rule
-  //rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28))
-  rule.randomizer.init(HashSet(4, 5, 6, 7, 8, 9, 10))
+  rule.randomizer.init(HashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28))
+  //rule.randomizer.init(HashSet(4, 5, 6, 7, 8, 9, 10))
   
   val handler = defaultSetting.handler
   var field = new Field(rule)
@@ -137,6 +137,14 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     def procedureWorking(executer: PhaseExecuter) {
       val c = wrapper.control
       
+      if(c.pressed(Buttons.A)){
+        field.rotateMinoCCW()
+        lockdownTimer = 0
+      }
+      if(c.pressed(Buttons.B)){
+        field.rotateMinoCW()
+        lockdownTimer = 0 
+      }
       if(c.pressed(Buttons.LEFT)){  
         if(field.moveMinoLeft()) lockdownTimer = 0
         moveDirection = -1
@@ -198,14 +206,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
           }
         }
       }
-      if(c.pressed(Buttons.A)){
-        field.rotateMinoCCW()
-        lockdownTimer = 0
-      }
-      if(c.pressed(Buttons.B)){
-        field.rotateMinoCW()
-        lockdownTimer = 0 
-      }
+
       if(c.pressed(Buttons.C)){
 			  field.hold()
 			  fallCounter = 0
@@ -408,7 +409,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   field.init()
   
   private var fallCounter = 0f
-  private var fallCounterDelta = 100f
+  private var fallCounterDelta = 0f
   private var softDropCounter = 0f
   private var softDropCounterDelta = 1f
   private var lockdownTimer = 0
@@ -482,6 +483,9 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     g.translate(0, 80)
     for(i <- 0 until rule.numNext) {
       drawMino(g)(field.nextMino(i))
+      var ((x, y), (w, h)) = MinoList.rectangle(field.nextMino(i).minoId, field.nextMino(i).rotationState)
+      Resource.boldfont.drawString("%d,%d;%d,%d".format(x, y, w, h), 0, 0)
+      g.drawRect(x * 16, (- y - h) * 16, w * 16, h * 16)
       g.translate(96, 0)
     }
     g.popTransform()

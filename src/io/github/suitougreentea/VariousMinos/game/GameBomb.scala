@@ -430,16 +430,15 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
         executer.exec()
   }
   def render(g: Graphics) {
-    //Resource.design.draw()
     g.setBackground(Color.darkGray)
     g.clear()
-    Resource.frame.draw(152, 144)
+    //Resource.design.draw()
     g.pushTransform()
     g.translate(168, 512)
     drawField(g)(field)
     if(executer.currentPhase.id == 0 && executer.currentPosition == Position.WORKING) {
-      drawFieldMino(g)(field)
       drawFieldMinoGhost(g)(field)
+      drawFieldMino(g)(field)
     }
     if(executer.currentPhase.id == 2) {
       for(e <- bombList){
@@ -479,21 +478,32 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     }
     g.popTransform()
     
+    if(rule.numNext >= 1) {
+      g.pushTransform()
+      g.translate(216, 136)
+      drawNextMino(g)(field.nextMino(0))
+      g.popTransform()
+    }
+    if(rule.numNext >= 2) {    
+      g.pushTransform()
+      g.translate(304, 128)
+      drawNextMino(g)(field.nextMino(1), true)
+      g.popTransform()
+    }
     g.pushTransform()
-    g.translate(0, 80)
-    for(i <- 0 until rule.numNext) {
-      drawMino(g)(field.nextMino(i))
-      var ((x, y), (w, h)) = MinoList.rectangle(field.nextMino(i).minoId, field.nextMino(i).rotationState)
-      Resource.boldfont.drawString("%d,%d;%d,%d".format(x, y, w, h), 0, 0)
-      g.drawRect(x * 16, (- y - h) * 16, w * 16, h * 16)
-      g.translate(96, 0)
+    g.translate(352, 128)
+    for(i <- 2 until rule.numNext){
+      drawNextMino(g)(field.nextMino(i), true)
+      g.translate(0, 32)      
     }
     g.popTransform()
     
     g.pushTransform()
-    g.translate(720, 80)
-    if(field.holdMino != null) drawMino(g)(field.holdMino)
+    g.translate(160, 128)
+    if(field.holdMino != null) drawNextMino(g)(field.holdMino, true)
     g.popTransform()
+    
+    Resource.frame.draw(152, 144)
     
     Resource.frame.draw(456, 144)
     

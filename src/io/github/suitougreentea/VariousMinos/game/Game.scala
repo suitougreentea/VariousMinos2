@@ -11,5 +11,6 @@ trait Game {
 trait GameWrapper {
   def control: Control
   def game: Game
+  def side: Int
   def exit(code: Int)
 }

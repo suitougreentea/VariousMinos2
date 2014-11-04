@@ -29,11 +29,14 @@ import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombInfinite
 import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombFinite
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombFinite
 import scala.collection.mutable.HashSet
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvival
+import io.github.suitougreentea.VariousMinos.game.HandlerBombPuzzle
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   val wrapper1p = new GameWrapper {
     var _control: Control = null
     def control = _control
+    val side = 0
     var game: Game = null
     def exit(code: Int) {
       phase = 0
@@ -74,7 +77,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
           Resource.boldfont.drawString("Contest", 32, 96)
           Resource.boldfont.drawString("Puzzle", 32, 128)
           Resource.boldfont.drawString("Master", 32, 160, color = new Color(0.3f, 0.3f, 0.3f))
-          Resource.boldfont.drawString("Survival", 32, 192, color = new Color(0.3f, 0.3f, 0.3f))
+          Resource.boldfont.drawString("Survival", 32, 192)
         }
         case 1 => {
           Resource.boldfont.drawString(">", 16, 64 + cursor * 32, color = new Color(1f, 1f, 0f))
@@ -102,7 +105,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
         phase match {
           case 0 => {
             cursor match {
-              case 0 | 1 | 2 => {
+              case 0 | 1 | 2 | 4 => {
                 mode = cursor
                 phase = 1
                 cursor = 0
@@ -134,7 +137,10 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
         new HandlerBombContest()
       }
       case 2 => {
-        new HandlerBombContest()
+        new HandlerBombPuzzle()
+      }
+      case 4 => {
+        new HandlerBombSurvival()
       }
     }
     
@@ -149,7 +155,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     var defaultSetting: DefaultSettingBomb = null
     
     mode match {
-      case 0 => {
+      case 0 | 4 => {
         defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombInfinite(ruleClass, new MinoGeneratorConfigBombInfinite(HashSet(4, 5, 6, 7, 8, 9, 10))))
       }
       case 1 => {

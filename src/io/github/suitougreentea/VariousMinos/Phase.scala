@@ -5,8 +5,8 @@ import org.newdawn.slick.GameContainer
 
 trait Phase {
   val id: Int
-  def beforeTime: Int
-  def afterTime: Int
+  var beforeTime: Int
+  var afterTime: Int
   def handleBeforeBefore(executer: PhaseExecuter) {}
   def procedureBefore(executer: PhaseExecuter) {
     if(executer.timer == beforeTime) {

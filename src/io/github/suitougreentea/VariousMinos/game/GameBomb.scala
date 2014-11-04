@@ -25,7 +25,6 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   val _this = this
   val rule = defaultSetting.rule
   val handler = defaultSetting.handler
-  handler.init(this)
   var field = new Field(rule)
   
   field.generator = defaultSetting.generator
@@ -39,8 +38,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   
   val phaseReady : Phase = new Phase {
     val id = -1
-    val beforeTime = 10
-    val afterTime = 30
+    var beforeTime = 10
+    var afterTime = 30
     
     override def handleBeforeBefore(executer: PhaseExecuter){
       searchBigBomb()
@@ -76,8 +75,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   
   val phaseMoving : Phase = new Phase {
     val id = 0
-    val beforeTime = 10
-    val afterTime = 0
+    var beforeTime = 10
+    var afterTime = 0
     override def handleAfterBefore(executer: PhaseExecuter) {
       val c = wrapper.control
       
@@ -184,8 +183,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
             field.hardDrop()
             executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
           } else {
-            field.moveMinoDown()
-            if(rule.resetByFalling) lockdownTimer = 0
+            if(field.moveMinoDown() && rule.resetByFalling) lockdownTimer = 0
           }
           softDropCounter -= 1          
         }
@@ -210,9 +208,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
       
       fallCounter += fallCounterDelta
       while(fallCounter >= 1) {
-        field.moveMinoDown()
+        if(field.moveMinoDown() && rule.resetByFalling) lockdownTimer = 0
         fallCounter -= 1
-        if(rule.resetByFalling) lockdownTimer = 0
       }
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
@@ -227,8 +224,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
 
   val phaseCounting : Phase = new Phase {
     val id = 1
-    val beforeTime = 10
-    val afterTime = 10
+    var beforeTime = 10
+    var afterTime = 10
     def procedureWorking(executer: PhaseExecuter) {
       if(existBombLine){
         chain += 1
@@ -245,8 +242,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   
   val phaseErasing : Phase = new Phase {
     val id = 2
-    val beforeTime = 0
-    val afterTime = 0
+    var beforeTime = 0
+    var afterTime = 0
     var bombListNew: HashSet[(Int, Int, Boolean)] = HashSet.empty
     override def handleAfterBefore(executer: PhaseExecuter) {
       bombList = HashSet.empty
@@ -318,8 +315,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   
   val phaseFalling : Phase = new Phase {
     val id = 3
-    val beforeTime = 0
-    val afterTime = 0
+    var beforeTime = 0
+    var afterTime = 0
     def procedureWorking(executer: PhaseExecuter) {
       fallingPieceCounter += fallingPieceCounterDelta
       while (fallingPieceCounter >= 1){
@@ -367,8 +364,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   }
   val phaseMakingBigBomb : Phase = new Phase {
     val id = 4
-    val beforeTime = 10
-    val afterTime = 10
+    var beforeTime = 10
+    var afterTime = 10
     override def handleBeforeBefore(executer: PhaseExecuter){
       var flag = false
       for(iy <- 0 until field.height; ix <- 0 until 10){
@@ -401,26 +398,28 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   }
  
   var executer: PhaseExecuter = new PhaseExecuter(phaseReady)
-  field.init()
   
   private var fallCounter = 0f
-  private var fallCounterDelta = 0f
+  var fallCounterDelta = 0f
   private var softDropCounter = 0f
-  private var softDropCounterDelta = 1f
+  var softDropCounterDelta = 1f
   private var lockdownTimer = 0
-  private var lockdownTimerMax = 60
+  var lockdownTimerMax = 60
   private var forceLockdownTimer = 0
-  private var forceLockdownTimerMax = 180
+  var forceLockdownTimerMax = 180
   
   private var moveDirection = 0
   private var firstMoveTimer = 0
-  private var firstMoveTimerMax = 5
+  var firstMoveTimerMax = 5
   private var moveCounter = 0f
-  private var moveCounterDelta = 0.5f
+  var moveCounterDelta = 0.5f
   
   private var lastLines = 0
   private var chain = 0
   
+  handler.init(this)
+  field.init()
+
   def update() {
         executer.exec()
   }
@@ -519,6 +518,8 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
             fallingPieceCounter,
             chain),
             472, 160)
+            
+    handler.render(this, g)
   }
     
   override def graphicId(block: Block): Int = {

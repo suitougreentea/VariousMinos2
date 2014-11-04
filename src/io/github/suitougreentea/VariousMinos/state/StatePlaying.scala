@@ -134,10 +134,14 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     var handler = mode match {
       case 0 => new HandlerBombEndless()
       case 1 => {
-        new HandlerBombContest()
+        var loader = new StageLoader("stage/contest.vms")
+        loader.load()
+        new HandlerBombContest(loader(0))
       }
       case 2 => {
-        new HandlerBombPuzzle()
+        var loader = new StageLoader("stage/puzzle.vms")
+        loader.load()
+        new HandlerBombPuzzle(loader(0))
       }
       case 4 => {
         new HandlerBombSurvival()
@@ -152,25 +156,6 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
       case 4 => new RuleVariantPlus()
     }
     
-    var defaultSetting: DefaultSettingBomb = null
-    
-    mode match {
-      case 0 | 4 => {
-        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombInfinite(ruleClass, new MinoGeneratorConfigBombInfinite(HashSet(4, 5, 6, 7, 8, 9, 10))))
-      }
-      case 1 => {
-        var loader = new StageLoader("stage/contest.vms")
-        loader.load()
-        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombInfinite(ruleClass, loader(0).mino.asInstanceOf[MinoGeneratorConfigBombInfinite]))
-        defaultSetting.field = loader(0).field  
-      }
-      case 2 => {
-        var loader = new StageLoader("stage/puzzle.vms")
-        loader.load()
-        defaultSetting = new DefaultSettingBomb(ruleClass, handler, new MinoGeneratorBombFinite(ruleClass, loader(0).mino.asInstanceOf[MinoGeneratorConfigBombFinite]))
-        defaultSetting.field = loader(0).field 
-      }
-    }
-    wrapper1p.game = new GameBomb(wrapper1p, defaultSetting)
+    wrapper1p.game = new GameBomb(wrapper1p, handler, ruleClass)
   }
 }

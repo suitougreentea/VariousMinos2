@@ -20,19 +20,11 @@ import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
+import io.github.suitougreentea.VariousMinos.rule.Rule
 
-class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) extends Game with CommonRenderer {
+class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rule) extends Game with CommonRenderer {
   val _this = this
-  val rule = defaultSetting.rule
-  val handler = defaultSetting.handler
   var field = new Field(rule)
-  
-  field.generator = defaultSetting.generator
-  if(defaultSetting.field != null) {
-    for(iy <- 0 until defaultSetting.field.size; ix <- 0 until 10){
-      field(ix, iy) = new Block(defaultSetting.field(iy)(ix))
-    }
-  }
   
   val bombSize = Array ((3, 0), (3, 1), (3, 2), (3, 3), (4, 4), (4, 4), (5, 5), (5, 5), (6, 6), (6, 6), (7, 7), (7, 7), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8), (8, 8))
   
@@ -397,7 +389,6 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     return false
   }
  
-  var executer: PhaseExecuter = new PhaseExecuter(phaseReady)
   
   private var fallCounter = 0f
   var fallCounterDelta = 0f
@@ -419,6 +410,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   
   handler.init(this)
   field.init()
+  var executer: PhaseExecuter = new PhaseExecuter(phaseReady)
 
   def update() {
         executer.exec()

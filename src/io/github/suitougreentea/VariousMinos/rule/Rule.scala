@@ -13,6 +13,9 @@ trait Rule {
   val enableInitialHold = true
   val enableInitialMove = false
   val enableInitialRotate = true
+  val resetByFalling = true
+  val resetByRotating = true
+  val resetByMoving = true
 }
 
 class RuleClassic extends Rule {
@@ -26,6 +29,8 @@ class RuleClassic extends Rule {
   enableHold = false
   override val numNext = 1
   override val enableInitialRotate = false
+  override val resetByRotating = false
+  override val resetByMoving = false
 }
 
 class RuleClassicPlus extends RuleClassic {
@@ -34,6 +39,8 @@ class RuleClassicPlus extends RuleClassic {
   override val downKeyLock = false
   enableHold = true
   override val numNext = 7
+  override val resetByRotating = true
+  override val resetByMoving = true
 }
 
 class RuleStandard extends Rule {
@@ -52,6 +59,8 @@ class RuleVariantClassic extends Rule {
   override val downKeyLock = true
   enableHold = false
   override val numNext = 1
+  override val resetByRotating = false
+  override val resetByMoving = false
 }
 
 class RuleVariantPlus extends RuleVariantClassic {

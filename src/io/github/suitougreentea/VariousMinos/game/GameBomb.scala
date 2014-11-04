@@ -25,6 +25,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   val _this = this
   val rule = defaultSetting.rule
   val handler = defaultSetting.handler
+  handler.init(this)
   var field = new Field(rule)
   
   field.generator = defaultSetting.generator
@@ -132,21 +133,19 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
       val c = wrapper.control
       
       if(c.pressed(Buttons.A)){
-        field.rotateMinoCCW()
-        lockdownTimer = 0
+        if(field.rotateMinoCCW() && rule.resetByRotating) lockdownTimer = 0
       }
       if(c.pressed(Buttons.B)){
-        field.rotateMinoCW()
-        lockdownTimer = 0 
+        if(field.rotateMinoCW() && rule.resetByRotating) lockdownTimer = 0 
       }
       if(c.pressed(Buttons.LEFT)){  
-        if(field.moveMinoLeft()) lockdownTimer = 0
+        if(field.moveMinoLeft() && rule.resetByMoving) lockdownTimer = 0
         moveDirection = -1
         firstMoveTimer = 0
         moveCounter = 0
       }
       if(c.pressed(Buttons.RIGHT)){
-        if(field.moveMinoRight()) lockdownTimer = 0
+        if(field.moveMinoRight() && rule.resetByMoving) lockdownTimer = 0
         moveDirection = 1
         firstMoveTimer = 0
         moveCounter = 0
@@ -156,7 +155,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   		    if(firstMoveTimer == firstMoveTimerMax){
     		  	moveCounter += moveCounterDelta
     			  while(moveCounter >= 1) {
-    			    if(field.moveMinoLeft()) lockdownTimer = 0
+    			    if(field.moveMinoLeft() && rule.resetByMoving) lockdownTimer = 0
     			    moveCounter -= 1
     			  }
   		    } else {
@@ -169,7 +168,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
   		    if(firstMoveTimer == firstMoveTimerMax){
       			moveCounter += moveCounterDelta
       			while(moveCounter >= 1) {
-      			    if(field.moveMinoRight()) lockdownTimer = 0
+      			    if(field.moveMinoRight() && rule.resetByMoving) lockdownTimer = 0
       			    moveCounter -= 1
       			}
   		    } else {
@@ -186,6 +185,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
             executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
           } else {
             field.moveMinoDown()
+            if(rule.resetByFalling) lockdownTimer = 0
           }
           softDropCounter -= 1          
         }
@@ -212,6 +212,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
       while(fallCounter >= 1) {
         field.moveMinoDown()
         fallCounter -= 1
+        if(rule.resetByFalling) lockdownTimer = 0
       }
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {

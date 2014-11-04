@@ -19,13 +19,38 @@ trait MinoGeneratorFinite extends MinoGenerator {
 }
 
 class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigBombInfinite) extends MinoGeneratorInfinite {
+  var bombCounter = config.bombOffset
+  var allBombCounter = config.allBombOffset
+  var whiteCounter = config.whiteOffset
+  var blackCounter = config.blackOffset
   rule.randomizer.init(config.set)
   def next() = {
     var id = rule.randomizer.next()
     var num = MinoList.numBlocks(id)
-    var array = Array.fill(num)(new Block(rule.color.get(id)))
-    //var array = Array.fill(num)(new Block(73))
-    array(Math.random() * num toInt) = new Block(64)
+    var array: Array[Block] = Array.empty
+    bombCounter += 1
+    allBombCounter += 1
+    whiteCounter += 1
+    blackCounter += 1
+    
+    array = if(allBombCounter == config.allBombFrequency){
+      allBombCounter = 0
+      Array.fill(num)(new Block(64))
+    } else if(blackCounter == config.blackFrequency){
+      blackCounter = 0
+      Array.fill(num)(new Block(74 + config.blackLevel))
+    } else if(whiteCounter == config.whiteFrequency){
+      whiteCounter = 0
+      Array.fill(num)(new Block(69 + config.whiteLevel))
+    } else {
+      Array.fill(num)(new Block(rule.color.get(id)))
+    }
+    
+    if(bombCounter == config.bombFrequency){
+      bombCounter = 0
+      array(Math.random() * num toInt) = new Block(64)  
+    }
+    
     new Mino(id, rule.spawn.getRotation(id), array)
   }
 }

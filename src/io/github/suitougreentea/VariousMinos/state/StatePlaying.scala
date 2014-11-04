@@ -15,10 +15,8 @@ import org.newdawn.slick.Input
 import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.game.Game
 import io.github.suitougreentea.VariousMinos.rule.RuleClassic
-import io.github.suitougreentea.VariousMinos.DefaultSetting
 import io.github.suitougreentea.VariousMinos.StageLoader
 import io.github.suitougreentea.VariousMinos.game.HandlerBombContest
-import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 import io.github.suitougreentea.VariousMinos.rule.RuleStandard
 import io.github.suitougreentea.VariousMinos.game.HandlerBombEndless
 import io.github.suitougreentea.VariousMinos.rule.RuleClassicPlus

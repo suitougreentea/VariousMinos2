@@ -18,7 +18,6 @@ import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.Mino
 import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
-import io.github.suitougreentea.VariousMinos.DefaultSettingBomb
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
 import io.github.suitougreentea.VariousMinos.rule.Rule
 
@@ -81,6 +80,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         handler.noNewMino(_this)
       } else {
         field.newMino()
+        handler.newMino(_this)
       }
       
       if(c.down(Buttons.C) && !c.pressed(Buttons.C) && rule.enableInitialHold){
@@ -216,14 +216,21 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
 
   val phaseCounting : Phase = new Phase {
     val id = 1
-    var beforeTime = 10
-    var afterTime = 10
+    var beforeTime = 0
+    var afterTime = 0
+    override def procedureBefore(executer: PhaseExecuter) {
+      super.procedureBefore(executer)
+      // TODO: 整理
+    }
     def procedureWorking(executer: PhaseExecuter) {
       if(existBombLine){
         chain += 1
+        handler.fillLine(_this, field.filledLines.length + chain - 1, chain, false)
         executer.enterPhase(phaseErasing, true)
+      } else {
+        handler.fillLine(_this, field.filledLines.length + chain, chain, true)
+        executer.enterPhase(phaseMakingBigBomb, true) 
       }
-      else executer.enterPhase(phaseMakingBigBomb, true)
     }
   }
   
@@ -237,6 +244,8 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     var beforeTime = 0
     var afterTime = 0
     var bombListNew: HashSet[(Int, Int, Boolean)] = HashSet.empty
+    var erasedBlocksList = IndexedSeq.fill(field.height)(Array.fill(10)(false))
+    var erasedBlocks = 0
     override def handleAfterBefore(executer: PhaseExecuter) {
       bombList = HashSet.empty
       lastLines = field.filledLines.length
@@ -263,27 +272,36 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
             xr = (x - width) to (x + width)
           }
           for(iy <- yr; ix <- xr) {
-            var id = field(ix, iy).id
-            if(id == 64 && !bombList.contains(Tuple3(ix, iy, false))){
-              bombListNew += Tuple3(ix, iy, false)
-            } else if(id == 65 && !bombList.contains(Tuple3(ix, iy - 1, true))) {
-              bombListNew += Tuple3(ix, iy - 1, true)
-            } else if(id == 66 && !bombList.contains(Tuple3(ix - 1, iy - 1, true))) {
-              bombListNew += Tuple3(ix - 1, iy - 1, true)
-            } else if(id == 67 && !bombList.contains(Tuple3(ix, iy, true))) {
-              bombListNew += Tuple3(ix, iy, true)
-            } else if(id == 68 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
-              bombListNew += Tuple3(ix - 1, iy, true)
-            } else if((70 <= id && id <= 73) || (75 <= id && id <= 78)){
-              field(ix, iy).id -= 1
-            } else if(id == 79 || id == 80){
-            } else {
-              field(ix, iy) = new Block(0)
+            if(0 <= ix && ix < 10 && 0 <= iy && iy < field.height) {
+              var id = field(ix, iy).id
+              if(id == 64 && !bombList.contains(Tuple3(ix, iy, false))){
+                bombListNew += Tuple3(ix, iy, false)
+              } else if(id == 65 && !bombList.contains(Tuple3(ix, iy - 1, true))) {
+                bombListNew += Tuple3(ix, iy - 1, true)
+              } else if(id == 66 && !bombList.contains(Tuple3(ix - 1, iy - 1, true))) {
+                bombListNew += Tuple3(ix - 1, iy - 1, true)
+              } else if(id == 67 && !bombList.contains(Tuple3(ix, iy, true))) {
+                bombListNew += Tuple3(ix, iy, true)
+              } else if(id == 68 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
+                bombListNew += Tuple3(ix - 1, iy, true)
+              } else if(((70 <= id && id <= 73) || (75 <= id && id <= 78)) && !erasedBlocksList(iy)(ix)){
+                field(ix, iy).id -= 1
+                erasedBlocks += 1
+                erasedBlocksList(iy)(ix) = true
+              } else if(id == 79 || id == 80){
+              } else {
+                if(field(ix, iy).id > 0 && !erasedBlocksList(iy)(ix)){
+                  field(ix, iy) = new Block(0)
+                  erasedBlocks += 1
+                  erasedBlocksList(iy)(ix) = true
+                }
+              }
             }
           }
         }
       }
       if(bombTimer == bombTimerMax) {
+        erasedBlocksList = IndexedSeq.fill(field.height)(Array.fill(10)(false))
         bombTimer = 0
         if(bombListNew.size == 0){
           field.makeFallingPieces()
@@ -299,6 +317,10 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         }
       }
       bombTimer += 1
+    }
+    override def handleBeforeAfter(executer: PhaseExecuter){
+      handler.afterBomb(_this, erasedBlocks)
+      erasedBlocks = 0
     }
   }
   
@@ -344,15 +366,18 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         }
       }
   }
-  def makeBigBomb() {
-      for(e <- makingBigBombSet){
-        var (x, y) = e
-        field(x, y) = new Block(65)
-        field(x + 1, y) = new Block(66)
-        field(x, y - 1) = new Block(67)
-        field(x + 1, y - 1) = new Block(68)
-      }
-      makingBigBombSet = HashSet.empty
+  def makeBigBomb(): Int = {
+    var i = 0
+    for(e <- makingBigBombSet){
+      var (x, y) = e
+      field(x, y) = new Block(65)
+      field(x + 1, y) = new Block(66)
+      field(x, y - 1) = new Block(67)
+      field(x + 1, y - 1) = new Block(68)
+      i += 1
+    }
+    makingBigBombSet = HashSet.empty
+    i
   }
   val phaseMakingBigBomb : Phase = new Phase {
     val id = 4
@@ -374,7 +399,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       else super.procedureBefore(executer)
     }
     def procedureWorking(executer: PhaseExecuter) {
-      makeBigBomb()
+      handler.makeBigBomb(_this, makeBigBomb())
       executer.enterPhase(phaseMoving, true)
     }
   }

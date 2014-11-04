@@ -432,7 +432,7 @@ class GameBomb(val wrapper: GameWrapper, defaultSetting: DefaultSettingBomb) ext
     drawField(g)(field)
     if(executer.currentPhase.id == 0 && executer.currentPosition == Position.WORKING) {
       drawFieldMinoGhost(g)(field)
-      drawFieldMino(g)(field)
+      drawFieldMino(g)(field, 0.2f - lockdownTimer / (lockdownTimerMax toFloat) * 0.15f)
     }
     if(executer.currentPhase.id == 2) {
       for(e <- bombList){

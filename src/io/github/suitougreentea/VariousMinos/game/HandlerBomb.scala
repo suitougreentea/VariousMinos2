@@ -58,14 +58,28 @@ class HandlerBombSurvival extends HandlerBomb {
   var eraseBlocks = 0
   
   override def init(game: GameBomb){
-    game.field.generator = new MinoGeneratorBombInfinite(
+    /*game.field.generator = new MinoGeneratorBombInfinite(
         game.rule, 
         new MinoGeneratorConfigBombInfinite(
             HashSet(4, 5, 6, 7, 8, 9, 10),
             bombFrequency = 2,
             allBombFrequency = 15
          )
-    ) 
+    )*/
+    game.field.generator = new MinoGeneratorBombInfinite(
+        game.rule, 
+        new MinoGeneratorConfigBombInfinite(
+            HashSet(4, 5, 6, 7, 8, 9, 10),
+            bombFrequency = 2,
+            whiteFrequency = 20,
+            whiteLevel = 4,
+            blackFrequency = 2,
+            blackLevel = 0,
+            blackOffset = 1,
+            yellowFrequency = 3,
+            yellowLevel = 4
+         )
+    )  
     game.fallCounterDelta = 30f
     game.lockdownTimerMax = 20
     game.forceLockdownTimerMax = 180

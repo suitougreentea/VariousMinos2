@@ -173,7 +173,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         while(softDropCounter >= 1) {
           if(field.currentMinoY == field.ghostY && rule.downKeyLock){
             field.hardDrop()
-            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
           } else {
             if(field.moveMinoDown() && rule.resetByFalling) lockdownTimer = 0
           }
@@ -184,7 +184,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         if(rule.enableUpKey){
           if(rule.upKeyLock){
             field.hardDrop()
-            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
           } else {
             field.currentMinoY = field.ghostY
           }
@@ -206,7 +206,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
           field.hardDrop()
-          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else phaseMakingBigBomb, true)
+          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
         }
         lockdownTimer += 1
         forceLockdownTimer += 1
@@ -229,7 +229,8 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         executer.enterPhase(phaseErasing, true)
       } else {
         handler.fillLine(_this, field.filledLines.length + chain, chain, true)
-        executer.enterPhase(phaseMakingBigBomb, true) 
+        field.makeFallingPieces()
+        executer.enterPhase(phaseFalling, true) 
       }
     }
   }
@@ -284,11 +285,11 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
                 bombListNew += Tuple3(ix, iy, true)
               } else if(id == 68 && !bombList.contains(Tuple3(ix - 1, iy, true))) {
                 bombListNew += Tuple3(ix - 1, iy, true)
-              } else if(((70 <= id && id <= 73) || (75 <= id && id <= 78)) && !erasedBlocksList(iy)(ix)){
+              } else if(((70 <= id && id <= 73) || (76 <= id && id <= 79)) && !erasedBlocksList(iy)(ix)){
                 field(ix, iy).id -= 1
                 erasedBlocks += 1
                 erasedBlocksList(iy)(ix) = true
-              } else if(id == 79 || id == 80){
+              } else if(id == 74 || id == 80 || id == 86){
               } else {
                 if(field(ix, iy).id > 0 && !erasedBlocksList(iy)(ix)){
                   field(ix, iy) = new Block(0)
@@ -342,9 +343,18 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
             field.fallingPieceSet -= e
           }
         }
+        for(e <- field.fallingPieceSetIndependent){
+          println("a")
+          e.y -= 1
+          if(field.checkHitFallingPiece(piece = e)) {
+            e.y += 1
+            field.setFallingPiece(e)
+            field.fallingPieceSetIndependent -= e
+          }
+        }
         fallingPieceCounter -= 1
       }
-      if(field.fallingPieceSet.size == 0){
+      if(field.fallingPieceSet.size == 0 && field.fallingPieceSetIndependent.size == 0){
         if(field.filledLines.length > 0 && existBombLine) executer.enterPhase(phaseCounting, true)
         else {
           chain = 0
@@ -487,6 +497,9 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     for(e <- field.fallingPieceSet) {
       drawFallingPiece(g)(e)
     }
+    for(e <- field.fallingPieceSetIndependent) {
+      drawFallingPiece(g)(e)
+    }
     g.popTransform()
     
     if(rule.numNext >= 1 && field.nextMino(0) != null) {
@@ -547,7 +560,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     else if(id == 66) 130
     else if(id == 67) 193
     else if(id == 68) 194
-    else if(69 <= id && id <= 80) (id - 69) + 133
+    else if(69 <= id && id <= 86) (id - 69) + 133
     else id
   }
 }

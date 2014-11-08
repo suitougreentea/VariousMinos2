@@ -6,6 +6,7 @@ class FallingPiece {
   private var _array: ListBuffer[Array[Block]] = ListBuffer.empty
   var y = -1
   var containsPersistentBlock = false
+  var containsIndependentBlock = false
   def apply(x: Int, y:Int): Block = {
     var ny = y - this.y
     if(x < 0 || x >= 10 || ny < 0 || ny >= height) new Block(-1) else _array(ny)(x)

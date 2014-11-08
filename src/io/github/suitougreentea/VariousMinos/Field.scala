@@ -3,6 +3,7 @@ package io.github.suitougreentea.VariousMinos
 import io.github.suitougreentea.VariousMinos.rule.Rule
 import scala.language.dynamics
 import scala.collection.mutable.ArraySeq
+import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.HashSet
 
 class Field(var rule: Rule) {
@@ -42,6 +43,7 @@ class Field(var rule: Rule) {
   var alreadyHolded = false
   
   var fallingPieceSet: HashSet[FallingPiece] = HashSet.empty
+  var fallingPieceSetIndependent: ListBuffer[FallingPiece] = ListBuffer.empty
   
   def init(){
     if(generator.infinite) _nextMino = Array.fill(7)(generator.next())
@@ -180,7 +182,10 @@ class Field(var rule: Rule) {
   
   def makeFallingPieces() {
     for(iy <- 0 until height; ix <- 0 until 10){
-      if(this(ix, iy).id > 0) fallingPieceSet += makeFallingPiece(new FallingPiece(), ix, iy)
+      if(this(ix, iy).id > 0) {
+        val piece = makeFallingPiece(new FallingPiece(), ix, iy)
+        fallingPieceSet += piece
+      }
     }
     
     for(e <- fallingPieceSet){
@@ -194,12 +199,14 @@ class Field(var rule: Rule) {
   def makeFallingPiece(piece: FallingPiece, x: Int, y: Int) : FallingPiece = {
     var result = piece
     if(this(x, y).persistent) result.containsPersistentBlock = true
+    if(this(x, y).independent) result.containsIndependentBlock = true
     result(x, y) = this(x, y)
     this(x, y) = new Block(0)
-    if(this(x - 1, y).id > 0) result = makeFallingPiece(piece, x - 1, y)
-    if(this(x + 1, y).id > 0) result = makeFallingPiece(piece, x + 1, y)
-    if(this(x, y - 1).id > 0) result = makeFallingPiece(piece, x, y - 1)
-    if(this(x, y + 1).id > 0) result = makeFallingPiece(piece, x, y + 1)
+    if(result.containsIndependentBlock) return result
+    if(this(x - 1, y).id > 0 && !this(x - 1, y).independent) result = makeFallingPiece(piece, x - 1, y)
+    if(this(x + 1, y).id > 0 && !this(x + 1, y).independent) result = makeFallingPiece(piece, x + 1, y)
+    if(this(x, y - 1).id > 0 && !this(x, y - 1).independent) result = makeFallingPiece(piece, x, y - 1)
+    if(this(x, y + 1).id > 0 && !this(x, y + 1).independent) result = makeFallingPiece(piece, x, y + 1)
     result
   }
   

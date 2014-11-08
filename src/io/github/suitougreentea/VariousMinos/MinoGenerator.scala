@@ -23,6 +23,7 @@ class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigB
   var allBombCounter = config.allBombOffset
   var whiteCounter = config.whiteOffset
   var blackCounter = config.blackOffset
+  var yellowCounter = config.yellowOffset
   rule.randomizer.init(config.set)
   def next() = {
     var id = rule.randomizer.next()
@@ -32,13 +33,17 @@ class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigB
     allBombCounter += 1
     whiteCounter += 1
     blackCounter += 1
+    yellowCounter += 1
     
     array = if(allBombCounter == config.allBombFrequency){
       allBombCounter = 0
       Array.fill(num)(new Block(64))
+    } else if(yellowCounter == config.yellowFrequency){
+      yellowCounter = 0
+      Array.fill(num)(new Block(81 + config.yellowLevel))
     } else if(blackCounter == config.blackFrequency){
       blackCounter = 0
-      Array.fill(num)(new Block(74 + config.blackLevel))
+      Array.fill(num)(new Block(75 + config.blackLevel))
     } else if(whiteCounter == config.whiteFrequency){
       whiteCounter = 0
       Array.fill(num)(new Block(69 + config.whiteLevel))

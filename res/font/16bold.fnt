@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <font>
   <info face="BoldAscii16" size="-14" bold="1" italic="0" charset="" unicode="1" stretchH="100" smooth="0" aa="0" padding="0,0,0,0" spacing="0,0" outline="0"/>
-  <common lineHeight="16" base="13" scaleW="1024" scaleH="1024" pages="3" packed="0" alphaChnl="1" redChnl="0" greenChnl="0" blueChnl="0"/>
+  <common lineHeight="16" base="0" scaleW="1024" scaleH="1024" pages="3" packed="0" alphaChnl="1" redChnl="0" greenChnl="0" blueChnl="0"/>
   <pages>
     <page id="0" file="16bold.png" />
   </pages>
@@ -24,7 +24,7 @@
 	<char id="47" x="240" y="0" width="10" height="16" xoffset="0" yoffset="0" xadvance="10" page="0" />
 	
 	<char id="48" x="0" y="16" width="10" height="16" xoffset="0" yoffset="0" xadvance="10" page="0" />
-	<char id="49" x="16" y="16" width="4" height="16" xoffset="0" yoffset="0" xadvance="4" page="0" />
+	<char id="49" x="16" y="16" width="5" height="16" xoffset="0" yoffset="0" xadvance="5" page="0" />
 	<char id="50" x="32" y="16" width="10" height="16" xoffset="0" yoffset="0" xadvance="10" page="0" />
 	<char id="51" x="48" y="16" width="10" height="16" xoffset="0" yoffset="0" xadvance="10" page="0" />
 	<char id="52" x="64" y="16" width="10" height="16" xoffset="0" yoffset="0" xadvance="10" page="0" />

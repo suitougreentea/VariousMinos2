@@ -27,7 +27,7 @@ import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombInfinite
 import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombFinite
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombFinite
 import scala.collection.mutable.HashSet
-import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvival
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalEasy
 import io.github.suitougreentea.VariousMinos.game.HandlerBombPuzzle
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
@@ -142,7 +142,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
         new HandlerBombPuzzle(loader(0))
       }
       case 4 => {
-        new HandlerBombSurvival()
+        new HandlerBombSurvivalEasy()
       }
     }
     

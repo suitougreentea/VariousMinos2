@@ -173,7 +173,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         while(softDropCounter >= 1) {
           if(field.currentMinoY == field.ghostY && rule.downKeyLock){
             field.hardDrop()
-            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
+            executer.enterPhase(phaseCounting, true)
           } else {
             if(field.moveMinoDown() && rule.resetByFalling) lockdownTimer = 0
           }
@@ -184,7 +184,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         if(rule.enableUpKey){
           if(rule.upKeyLock){
             field.hardDrop()
-            executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
+            executer.enterPhase(phaseCounting, true)
           } else {
             field.currentMinoY = field.ghostY
           }
@@ -206,7 +206,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       if(field.currentMinoY == field.ghostY) {
         if(lockdownTimer == lockdownTimerMax || forceLockdownTimer == forceLockdownTimerMax) {
           field.hardDrop()
-          executer.enterPhase(if(field.filledLines.length != lastLines) phaseCounting else {field.makeFallingPieces(); phaseFalling}, true)
+          executer.enterPhase(phaseCounting, true)
         }
         lockdownTimer += 1
         forceLockdownTimer += 1
@@ -219,8 +219,8 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     var beforeTime = 0
     var afterTime = 0
     override def procedureBefore(executer: PhaseExecuter) {
-      super.procedureBefore(executer)
-      // TODO: 整理
+      if(field.filledLines.length == lastLines) executer.enterPhase(phaseFalling, false)
+      else super.procedureBefore(executer)
     }
     def procedureWorking(executer: PhaseExecuter) {
       if(existBombLine){
@@ -229,7 +229,6 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         executer.enterPhase(phaseErasing, true)
       } else {
         handler.fillLine(_this, field.filledLines.length + chain, chain, true)
-        field.makeFallingPieces()
         executer.enterPhase(phaseFalling, true) 
       }
     }
@@ -305,13 +304,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         erasedBlocksList = IndexedSeq.fill(field.height)(Array.fill(10)(false))
         bombTimer = 0
         if(bombListNew.size == 0){
-          field.makeFallingPieces()
-          if(field.fallingPieceSet.size == 0){
-            chain = 0
-            executer.enterPhase(phaseMakingBigBomb, true)
-          } else {
-            executer.enterPhase(phaseFalling, true)
-          }
+          executer.enterPhase(phaseFalling, true)
         } else {
           bombList = bombListNew
           bombListNew = HashSet.empty
@@ -332,6 +325,15 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     val id = 3
     var beforeTime = 0
     var afterTime = 0
+    override def handleBeforeBefore(executer: PhaseExecuter) {
+      field.makeFallingPieces()
+    }
+    override def procedureBefore(executer: PhaseExecuter){
+      if(field.fallingPieceSet.size == 0) {
+        executer.enterPhase(phaseMakingBigBomb, false)
+      }
+      else super.procedureBefore(executer)
+    }
     def procedureWorking(executer: PhaseExecuter) {
       fallingPieceCounter += fallingPieceCounterDelta
       while (fallingPieceCounter >= 1){
@@ -344,7 +346,6 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
           }
         }
         for(e <- field.fallingPieceSetIndependent){
-          println("a")
           e.y -= 1
           if(field.checkHitFallingPiece(piece = e)) {
             e.y += 1
@@ -355,6 +356,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         fallingPieceCounter -= 1
       }
       if(field.fallingPieceSet.size == 0 && field.fallingPieceSetIndependent.size == 0){
+        lastLines = 0
         if(field.filledLines.length > 0 && existBombLine) executer.enterPhase(phaseCounting, true)
         else {
           chain = 0
@@ -394,6 +396,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     var beforeTime = 10
     var afterTime = 10
     override def handleBeforeBefore(executer: PhaseExecuter){
+      chain = 0
       var flag = false
       for(iy <- 0 until field.height; ix <- 0 until 10){
         if(field(ix, iy).id != 0) flag = true
@@ -405,12 +408,33 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       }
     }
     override def procedureBefore(executer: PhaseExecuter){
-      if(makingBigBombSet.size == 0) executer.enterPhase(phaseMoving, false)
+      if(allEraseFlag){
+        allEraseFlag = false
+        executer.enterPhase(phaseErasingField, false)
+      }
+      else if(makingBigBombSet.size == 0) executer.enterPhase(phaseMoving, false)
       else super.procedureBefore(executer)
     }
     def procedureWorking(executer: PhaseExecuter) {
       handler.makeBigBomb(_this, makeBigBomb())
       executer.enterPhase(phaseMoving, true)
+    }
+  }
+  
+  val phaseErasingField: Phase = new Phase {
+    val id = 5
+    var beforeTime = 0
+    var afterTime = 180
+    def procedureWorking(executer: PhaseExecuter) {
+      executer.enterPhase(phaseMoving, true)
+    }
+    override def procedureAfter(executer: PhaseExecuter) {
+      if(executer.timer % 5 == 0) {
+        for(i <- 0 until 10){
+          field(i, executer.timer / 5) = new Block(0)
+        }
+      }
+      super.procedureAfter(executer) 
     }
   }
   
@@ -442,6 +466,8 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
   
   private var lastLines = 0
   private var chain = 0
+  
+  var allEraseFlag = false
   
   handler.init(this)
   field.init()

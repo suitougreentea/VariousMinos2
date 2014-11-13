@@ -192,6 +192,15 @@ class Field(var rule: Rule) {
       if(e.containsPersistentBlock) {
         setFallingPiece(e)
         fallingPieceSet -= e
+      } else {
+        e.y -= 1
+        if(checkHitFallingPiece(piece = e)) {
+          e.y += 1
+          setFallingPiece(e)
+          fallingPieceSet -= e
+        } else {
+          e.y += 1
+        }
       }
     }
   }

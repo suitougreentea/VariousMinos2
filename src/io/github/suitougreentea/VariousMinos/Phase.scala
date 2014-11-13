@@ -20,7 +20,7 @@ trait Phase {
   def procedureWorking(executer: PhaseExecuter)
   def handleBeforeAfter(executer: PhaseExecuter) {}
   def procedureAfter(executer: PhaseExecuter) {
-    if(executer.timer == beforeTime) {
+    if(executer.timer == afterTime) {
       executer.timer = 0
       executer.moveToNewPhase()
     } else {

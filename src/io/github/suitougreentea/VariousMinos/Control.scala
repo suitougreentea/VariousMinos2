@@ -14,7 +14,6 @@ class Control(val input: Input) {
   keyConfig(Buttons.B) = HashSet(Input.KEY_X)
   keyConfig(Buttons.C) = HashSet(Input.KEY_C)
   
-  
   def pressed(button: Buttons.Value): Boolean = {
     for(e <- keyConfig(button)){
       if(input.isKeyPressed(e)) return true

@@ -7,10 +7,3 @@ trait Game {
   def update()
   def render(g: Graphics)
 }
-
-trait GameWrapper {
-  def control: Control
-  def game: Game
-  def side: Int
-  def exit(code: Int)
-}

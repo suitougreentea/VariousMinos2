@@ -29,6 +29,11 @@ import io.github.suitougreentea.VariousMinos.MinoGeneratorBombFinite
 import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalEasy
 import io.github.suitougreentea.VariousMinos.game.HandlerBombPuzzle
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalNormal
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalHard
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalInsane
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalFreezeChallenge
+import io.github.suitougreentea.VariousMinos.game.HandlerBombSurvivalVeryHard
 
 class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   val wrapper1p = new GameWrapper {
@@ -42,10 +47,13 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     }
   }
   
-  var cursor = 0
   var phase = 0
+  var modeCursor = 0
   var mode = 0
+  var ruleCursor = 0
   var rule = 0
+  var difficultyCursor = 0
+  var difficulty = 0
   
   def init(gc: GameContainer, sbg: StateBasedGame) = {
     wrapper1p._control = new Control(gc.getInput())
@@ -69,16 +77,17 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     } else {
       phase match {
         case 0 => {
-          Resource.boldfont.drawString(">", 16, 64 + cursor * 32, color = new Color(1f, 1f, 0f))
+          Resource.boldfont.drawString(">", 16, 64 + modeCursor * 32, color = new Color(1f, 1f, 0f))
           Resource.boldfont.drawString("Select Mode", 80, 16, TextAlign.CENTER, new Color(1f, 0.2f, 0.8f))
           Resource.boldfont.drawString("Endless", 32, 64)
           Resource.boldfont.drawString("Contest", 32, 96)
           Resource.boldfont.drawString("Puzzle", 32, 128)
           Resource.boldfont.drawString("Master", 32, 160, color = new Color(0.3f, 0.3f, 0.3f))
           Resource.boldfont.drawString("Survival", 32, 192)
+          Resource.boldfont.drawString("Difficulty: " + difficultyCursor, 0, 256)
         }
         case 1 => {
-          Resource.boldfont.drawString(">", 16, 64 + cursor * 32, color = new Color(1f, 1f, 0f))
+          Resource.boldfont.drawString(">", 16, 64 + ruleCursor * 32, color = new Color(1f, 1f, 0f))
           Resource.boldfont.drawString("Select Rule", 80, 16, TextAlign.CENTER, new Color(0.2f, 1f, 0.2f))
           Resource.boldfont.drawString("Classic", 32, 64)
           Resource.boldfont.drawString("ClassicPlus", 32, 96)
@@ -94,32 +103,32 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
   }
 
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int) = {
-    if(phase == -1) {
-      wrapper1p.game.update()
-    } else {
-      if(wrapper1p._control.pressed(Buttons.UP)) cursor -= 1
-      if(wrapper1p._control.pressed(Buttons.DOWN)) cursor += 1
-      if(wrapper1p._control.pressed(Buttons.A)) {
-        phase match {
-          case 0 => {
-            cursor match {
-              case 0 | 1 | 2 | 4 => {
-                mode = cursor
-                phase = 1
-                cursor = 0
-              }
-              case _ =>
-            }
+    phase match {
+      case -1 => wrapper1p.game.update()
+      case 0 => {
+        if(wrapper1p._control.pressed(Buttons.UP)) modeCursor -= 1
+        if(wrapper1p._control.pressed(Buttons.DOWN)) modeCursor += 1
+        if(wrapper1p._control.pressed(Buttons.LEFT)) difficultyCursor -= 1
+        if(wrapper1p._control.pressed(Buttons.RIGHT)) difficultyCursor += 1
+        if(wrapper1p._control.pressed(Buttons.A)) modeCursor match {
+          case 0 | 1 | 2 | 4 => {
+            mode = modeCursor
+            difficulty = difficultyCursor
+            phase = 1
+            modeCursor = 0
           }
-          case 1 =>
-            cursor match {
-              case 0 | 1 | 2 | 3 | 4 => {
-                rule = cursor
-                startGame(mode, rule)
-                phase = -1
-              }
-              case _ =>
-            }
+          case _ =>
+        }
+      }
+      case 1 => {
+        if(wrapper1p._control.pressed(Buttons.UP)) ruleCursor -= 1
+        if(wrapper1p._control.pressed(Buttons.DOWN)) ruleCursor += 1
+        if(wrapper1p._control.pressed(Buttons.A)) modeCursor match {
+          case 0 | 1 | 2 | 3 | 4 => {
+            rule = ruleCursor
+            startGame(mode, difficulty, rule)
+            phase = -1
+          }
           case _ =>
         }
       }
@@ -128,7 +137,7 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
     gc.getInput().clearKeyPressedRecord()
   }
   
-  def startGame(mode: Int, rule: Int){
+  def startGame(mode: Int, difficulty: Int, rule: Int){
     var handler = mode match {
       case 0 => new HandlerBombEndless()
       case 1 => {
@@ -142,7 +151,17 @@ class StatePlaying(@BeanProperty val ID: Int) extends BasicGameState {
         new HandlerBombPuzzle(loader(0))
       }
       case 4 => {
-        new HandlerBombSurvivalEasy()
+        difficulty match {
+          case 0 => new HandlerBombSurvivalEasy()
+          case 1 => new HandlerBombSurvivalNormal()
+          case 2 => new HandlerBombSurvivalHard()
+          case 3 => new HandlerBombSurvivalVeryHard()
+          case 4 => new HandlerBombSurvivalInsane()
+          case 5 => new HandlerBombSurvivalFreezeChallenge(1, 0)
+          case 6 => new HandlerBombSurvivalFreezeChallenge(0, 1)
+          case 7 => new HandlerBombSurvivalFreezeChallenge(1, 1)
+          case 8 => new HandlerBombSurvivalFreezeChallenge(0, 2)
+        }
       }
     }
     

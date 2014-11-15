@@ -241,12 +241,12 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
   
   val phaseErasing : Phase = new Phase {
     val id = 2
-    var beforeTime = 0
+    var beforeTime = 20
     var afterTime = 0
     var bombListNew: HashSet[(Int, Int, Boolean)] = HashSet.empty
     var erasedBlocksList = IndexedSeq.fill(field.height)(Array.fill(10)(false))
     var erasedBlocks = 0
-    override def handleAfterBefore(executer: PhaseExecuter) {
+    override def handleBeforeBefore(executer: PhaseExecuter) {
       bombList = HashSet.empty
       lastLines = field.filledLines.length
       for(iy <- field.filledLines; ix <- 0 until 10){
@@ -338,11 +338,18 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       fallingPieceCounter += fallingPieceCounterDelta
       while (fallingPieceCounter >= 1){
         for(e <- field.fallingPieceSet){
-          e.y -= 1
-          if(field.checkHitFallingPiece(piece = e)) {
-            e.y += 1
+          if(e.containsPersistentBlock){
+            // TODO: I really don't know why this bug occurs; this statement is to prevent black blocks from falling.
+            // TODO: If this bug is fixed, remove this statement
             field.setFallingPiece(e)
             field.fallingPieceSet -= e
+          } else {
+            e.y -= 1
+            if(field.checkHitFallingPiece(piece = e)) {
+              e.y += 1
+              field.setFallingPiece(e)
+              field.fallingPieceSet -= e
+            }
           }
         }
         for(e <- field.fallingPieceSetIndependent){
@@ -487,7 +494,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       drawFieldMinoGhost(g)(field)
       drawFieldMino(g)(field, 0.2f - lockdownTimer / (lockdownTimerMax toFloat) * 0.15f)
     }
-    if(executer.currentPhase.id == 2) {
+    if(executer.currentPhase.id == 2 && executer.currentPosition == Position.WORKING) {
       for(e <- bombList){
         var x = e._1 toFloat
         var y = e._2 toFloat
@@ -558,7 +565,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     Resource.frame.draw(456, 144)
     
     g.setColor(new Color(1f, 1f, 1f))
-    Resource.boldfont.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d".
+    Resource.boldfont.drawString("PhaseID: %d\nPosition: %s\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nLines: %d\nBomb: %d\nFallPiece: %f\nChain: %d\nLastLines: %d".
         format(executer.currentPhase.id,
             executer.currentPosition.toString(),
             executer.timer,
@@ -572,7 +579,8 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
             lastLines,
             bombTimer,
             fallingPieceCounter,
-            chain),
+            chain,
+            lastLines),
             472, 160)
             
     handler.render(this, g)

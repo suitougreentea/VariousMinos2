@@ -34,23 +34,24 @@ class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigB
     whiteCounter += 1
     blackCounter += 1
     yellowCounter += 1
-    
-    array = if(allBombCounter == config.allBombFrequency){
-      allBombCounter = 0
-      Array.fill(num)(new Block(64))
-    } else if(yellowCounter == config.yellowFrequency){
-      yellowCounter = 0
-      Array.fill(num)(new Block(81 + config.yellowLevel))
-    } else if(blackCounter == config.blackFrequency){
-      blackCounter = 0
-      Array.fill(num)(new Block(75 + config.blackLevel))
-    } else if(whiteCounter == config.whiteFrequency){
+     
+    array = Array.fill(num)(new Block(rule.color.get(id)))
+    if(whiteCounter == config.whiteFrequency){
       whiteCounter = 0
-      Array.fill(num)(new Block(69 + config.whiteLevel))
-    } else {
-      Array.fill(num)(new Block(rule.color.get(id)))
+      array = Array.fill(num)(new Block(69 + config.whiteLevel))
     }
-    
+    if(blackCounter == config.blackFrequency){
+      blackCounter = 0
+      array = Array.fill(num)(new Block(75 + config.blackLevel))
+    }
+    if(yellowCounter == config.yellowFrequency){
+      yellowCounter = 0
+      array = Array.fill(num)(new Block(81 + config.yellowLevel))
+    }
+    if(allBombCounter == config.allBombFrequency){
+      allBombCounter = 0
+      array = Array.fill(num)(new Block(64))
+    }
     if(bombCounter == config.bombFrequency){
       bombCounter = 0
       array(Math.random() * num toInt) = new Block(64)  

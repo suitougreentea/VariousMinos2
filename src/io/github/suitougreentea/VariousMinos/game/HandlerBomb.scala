@@ -2,7 +2,6 @@ package io.github.suitougreentea.VariousMinos.game
 
 import org.newdawn.slick.Graphics
 import io.github.suitougreentea.VariousMinos.Resource
-import io.github.suitougreentea.VariousMinos.Stage
 import io.github.suitougreentea.VariousMinos.Block
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombFinite
 import io.github.suitougreentea.VariousMinos.MinoGeneratorConfigBombFinite

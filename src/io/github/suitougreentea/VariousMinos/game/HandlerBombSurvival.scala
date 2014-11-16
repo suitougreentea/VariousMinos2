@@ -241,13 +241,13 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
     }
     
     game.fallCounterDelta = 30f
-    game.lockdownTimerMax = 60
+    game.lockdownTimerMax = 30
     game.forceLockdownTimerMax = 180
     game.phaseMoving.beforeTime = 10
-    game.bombTimerMiddle = 10
-    game.bombTimerMax = 20
-    game.phaseMakingBigBomb.beforeTime = 8
-    game.phaseMakingBigBomb.afterTime = 8
+    game.bombTimerMiddle = 5
+    game.bombTimerMax = 5
+    game.phaseMakingBigBomb.beforeTime = 2
+    game.phaseMakingBigBomb.afterTime = 2
     game.fallingPieceCounterDelta = 30f
   }
   

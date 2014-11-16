@@ -8,20 +8,20 @@ case class StageFileBombContest (
 }
 
 case class BombContestStage(
-  mino_num: Int,
-  mino_set: List[Int],
-  bomb_frequency: Int,
-  bomb_offset: Int,
-  allbomb_frequency: Int,
-  allbomb_offset: Int,
-  white_frequency: Int,
-  white_offset: Int,
-  white_level: Int,
-  black_frequency: Int,
-  black_offset: Int,
-  black_level: Int,
-  gravity: Float,
-  lock: Int,
-  field: List[Array[Int]]
+  var mino_num: Int,
+  var mino_set: List[Int],
+  var bomb_frequency: Int,
+  var bomb_offset: Int,
+  var allbomb_frequency: Int,
+  var allbomb_offset: Int,
+  var white_frequency: Int,
+  var white_offset: Int,
+  var white_level: Int,
+  var black_frequency: Int,
+  var black_offset: Int,
+  var black_level: Int,
+  var gravity: Float,
+  var lock: Int,
+  var field: List[Array[Int]]
 ) {
 }

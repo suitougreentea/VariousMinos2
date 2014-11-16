@@ -64,11 +64,11 @@ class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigB
 class MinoGeneratorBombFinite(val rule: Rule, val config: MinoGeneratorConfigBombFinite) extends MinoGeneratorFinite {
   var list: ArraySeq[Mino] = ArraySeq.fill(config.list.size)(null)
   for(j <- 0 until config.list.size){
-    var (id, bomb) = config.list(j)
-    var num = MinoList.numBlocks(id)
-    var array = Array.fill(num)(new Block(rule.color.get(id)))
-    if(bomb != -1) array(bomb) = new Block(64)
-    list(j) = new Mino(id, rule.spawn.getRotation(id), array)
+    var e = config.list(j)
+    var num = MinoList.numBlocks(e.id)
+    var array = Array.fill(num)(new Block(rule.color.get(e.id)))
+    if(e.bomb != -1) array(e.bomb) = new Block(64)
+    list(j) = new Mino(e.id, rule.spawn.getRotation(e.id), array)
   }
   def next() = {
     if(list.contains(0)) list.apply(0) else null

@@ -79,7 +79,7 @@ class HandlerBombSurvivalEasy extends HandlerBombSurvival {
     game.field.generator = new MinoGeneratorBombInfinite(
         game.rule, 
         new MinoGeneratorConfigBombInfinite(
-            HashSet(4, 5, 6, 7, 8, 9, 10),
+            Set(4, 5, 6, 7, 8, 9, 10),
             bombFrequency = 1,
             allBombFrequency = 15
          )
@@ -221,7 +221,7 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
       case 0 => new MinoGeneratorBombInfinite (
         game.rule, 
         new MinoGeneratorConfigBombInfinite(
-            HashSet(4, 5, 6, 7, 8, 9, 10),
+            Set(4, 5, 6, 7, 8, 9, 10),
             bombFrequency = 2,
             allBombFrequency = 25,
             whiteFrequency = 1,
@@ -231,7 +231,7 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
       case 1 => new MinoGeneratorBombInfinite (
         game.rule, 
         new MinoGeneratorConfigBombInfinite(
-            HashSet(4, 5, 6, 7, 8, 9, 10),
+            Set(4, 5, 6, 7, 8, 9, 10),
             bombFrequency = 2,
             allBombFrequency = 25,
             blackFrequency = 1,

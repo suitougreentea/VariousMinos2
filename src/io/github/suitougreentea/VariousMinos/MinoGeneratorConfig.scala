@@ -1,6 +1,7 @@
 package io.github.suitougreentea.VariousMinos
 
 import scala.collection.mutable.HashSet
+import io.github.suitougreentea.VariousMinos.stagefile.BombPuzzleMinoList
 
 trait MinoGeneratorConfig {
   val infinite: Boolean
@@ -15,7 +16,7 @@ class MinoGeneratorConfigFinite extends MinoGeneratorConfig {
 }
 
 class MinoGeneratorConfigBombInfinite(
-    var set: HashSet[Int],
+    var set: Set[Int],
     var bombFrequency: Int = 1, val bombOffset: Int = 0,
     var allBombFrequency: Int = 0, val allBombOffset: Int = 0,
     var whiteFrequency: Int = 0, val whiteOffset: Int = 0, var whiteLevel: Int = 0,
@@ -24,6 +25,6 @@ class MinoGeneratorConfigBombInfinite(
 ) extends MinoGeneratorConfigInfinite {
 }
 
-class MinoGeneratorConfigBombFinite(val list: Seq[(Int, Int)]) extends MinoGeneratorConfigFinite {
+class MinoGeneratorConfigBombFinite(val list: List[BombPuzzleMinoList]) extends MinoGeneratorConfigFinite {
   
 }

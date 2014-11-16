@@ -3,8 +3,8 @@ package io.github.suitougreentea.VariousMinos.rule
 import scala.collection.mutable.HashSet
 
 trait Randomizer {
-  var minoSet: HashSet[Int] = HashSet.empty
-  def init(minoSet: HashSet[Int]) {
+  var minoSet: Set[Int] = Set.empty
+  def init(minoSet: Set[Int]) {
     this.minoSet = minoSet
   }
   def next(): Int
@@ -23,7 +23,7 @@ class RandomizerBag() extends Randomizer {
   var bag: Array[Boolean] = Array.empty
   var list: List[Int] = List.empty
   var bagRemain = -1
-  override def init(minoSet: HashSet[Int]) {
+  override def init(minoSet: Set[Int]) {
     super.init(minoSet)
     list = minoSet.toList
     resetBag()

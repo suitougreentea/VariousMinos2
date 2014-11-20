@@ -3,8 +3,11 @@ package io.github.suitougreentea.VariousMinos.stagefile
 import scala.collection.mutable.HashSet
 
 case class StageFileBombContest (
+  `type`: String = "BombContest",
+  version: Int = 0,
   stages: List[BombContestStage]
 ) {
+  assert(`type` == "BombContest")
 }
 
 case class BombContestStage(
@@ -20,7 +23,7 @@ case class BombContestStage(
   var black_frequency: Int,
   var black_offset: Int,
   var black_level: Int,
-  var gravity: Float,
+  var gravity: Int,
   var lock: Int,
   var field: List[Array[Int]]
 ) {

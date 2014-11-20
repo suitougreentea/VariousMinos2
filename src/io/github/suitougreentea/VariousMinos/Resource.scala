@@ -7,7 +7,8 @@ object Resource {
   var frame,
   design,
   block,
-  bomb: Image = _
+  bomb,
+  hr: Image = _
   
   var jpfont,
   boldfont: AngelCodeFontXML = _
@@ -17,6 +18,7 @@ object Resource {
     design = loadImage("image/design.png")
     block = loadImage("image/block.png")
     bomb = loadImage("image/bomb.png")
+    hr = loadImage("image/hr.png")
     
     //jpfont = new AngelCodeFontXML("res/font/jpfont16.fnt")
     boldfont = new AngelCodeFontXML("res/font/16bold.fnt")

@@ -1,4 +1,6 @@
 {
+  "type" : "BombPuzzle",
+  "version" : 0,
   "stages" : [
     {
       "mino_list" : [

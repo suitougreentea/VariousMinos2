@@ -1,4 +1,6 @@
 {
+  "type" : "BombContest",
+  "version" : 0,
   "stages" : [
     {
       "mino_num" : 100,

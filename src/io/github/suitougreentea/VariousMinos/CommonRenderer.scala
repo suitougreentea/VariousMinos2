@@ -6,16 +6,21 @@ import org.lwjgl.opengl.GL11
 
 trait CommonRenderer {
   def graphicId(block: Block): Int = block.id
+  //def graphicId(block: Block): Int
   
-  def drawBlock(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
-    if(block == null) return
-    var id = graphicId(block)
+  def drawBlockByGraphicId(g: Graphics)(id: Int, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
     var sbx: Int = id % 64
     var sby: Int = id / 64
     var sx = sbx * 16
     var sy = sby * 16
     var scale = if(small) 8 else 16
     Resource.block.draw(x, y, x + scale, y + scale, sx, sy, sx + 16, sy + 16, new Color(1f, 1f, 1f, transparency))
+  }
+  
+  def drawBlock(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
+    if(block == null) return
+    var id = graphicId(block)
+    drawBlockByGraphicId(g)(id, x, y, small, transparency)
   }
   
   def drawBlockBrighten(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, brightness: Float = 0f) {
@@ -71,12 +76,25 @@ trait CommonRenderer {
   }
   
   // center the position (rect: w5h3)
-  def drawNextMino(g: Graphics)(mino: Mino, small: Boolean = false) {
+  def drawNextMino(g: Graphics)(mino: Mino, small: Boolean = false, transparency: Float = 1f) {
     var scale = if(small) 8 else 16
     var ((x, y), (w, h)) = MinoList.rectangle(mino.minoId, mino.rotationState)
     g.pushTransform()
     g.translate(((5 - w) / 2f - x) * scale, -((3 - h) / 2f - y) * scale)
-    drawMino(g)(mino, small)
+    drawMino(g)(mino, small, transparency)
     g.popTransform()
+  }
+}
+
+trait CommonRendererBomb extends CommonRenderer {
+  def graphicId(id: Int): Int = {
+    if(0 <= id && id < 64) id
+    else if(id == 64) 128
+    else if(id == 65) 129
+    else if(id == 66) 130
+    else if(id == 67) 193
+    else if(id == 68) 194
+    else if(69 <= id && id <= 86) (id - 69) + 133
+    else id
   }
 }

@@ -16,6 +16,7 @@ import io.github.suitougreentea.VariousMinos.GameStageEditor
 import io.github.suitougreentea.VariousMinos.EditorBombContest
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombContest
 import net.liftweb.json.DefaultFormats
+import net.liftweb.json.Serialization
 
 class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
   def init(gc: GameContainer, sbg: StateBasedGame) = {

@@ -3,9 +3,9 @@ package io.github.suitougreentea.VariousMinos.stagefile
 import scala.collection.mutable.HashSet
 
 case class StageFileBombContest (
-  `type`: String = "BombContest",
-  version: Int = 0,
-  stages: List[BombContestStage]
+  var `type`: String = "BombContest",
+  var version: Int = 0,
+  var stages: Array[BombContestStage]
 ) {
   assert(`type` == "BombContest")
 }

@@ -15,6 +15,8 @@ import net.liftweb.json.Serialization
 import net.liftweb.json.JsonAST
 import net.liftweb.json.DefaultFormats
 import io.github.suitougreentea.util.TextAlign
+import java.io.FileWriter
+import java.io.File
 
 
 trait Editor {
@@ -22,9 +24,9 @@ trait Editor {
   def render(g: Graphics)
 }
 
-class EditorBombContest(var file: StageFileBombContest) extends Editor with CommonRendererBomb {
+class EditorBombContest(var file: File, var stage: StageFileBombContest) extends Editor with CommonRendererBomb {
   var currentStageId = 0
-  var currentStage = file.stages(currentStageId)
+  var currentStage: BombContestStage = _
   
   var cursor = 0
   var detailedEditor = false
@@ -32,27 +34,52 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
   var testplay = false
   var wrapper: GameWrapper = _
   
-  val _field = new TypeEditorField("Field", currentStage.field, 
-      List(List.range(1, 36 + 1), List.range(69, 80 + 1), List(64)).flatten)
-  val _mino_num = new TypeEditorInt("Number of Mino(s)", currentStage.mino_num, minValue = 1)
-  val _mino_set = new TypeEditorMinoSet("Available Mino Set", currentStage.mino_set)
-  val _bomb_frequency = new TypeEditorInt("Bomb Frequency", currentStage.bomb_frequency, minValue = 0)
-  val _bomb_offset = new TypeEditorInt("Bomb Offset", currentStage.bomb_offset, minValue = 0)
-  val _allbomb_frequency = new TypeEditorInt("All Bomb Mino Frequency", currentStage.allbomb_frequency, minValue = 0)
-  val _allbomb_offset = new TypeEditorInt("All Bomb Mino Offset", currentStage.allbomb_offset, minValue = 0)
-  val _white_frequency = new TypeEditorInt("White Mino Frequency", currentStage.white_frequency, minValue = 0)
-  val _white_offset = new TypeEditorInt("White Mino Offset", currentStage.white_offset, minValue = 0)
-  val _white_level = new TypeEditorInt("White Mino Level", currentStage.white_level, minValue = 0, maxValue = 5)
-  val _black_frequency = new TypeEditorInt("Black Mino Frequency", currentStage.black_frequency, minValue = 0)
-  val _black_offset = new TypeEditorInt("Black Mino Offset", currentStage.black_offset, minValue = 0)
-  val _black_level = new TypeEditorInt("Black Mino Level", currentStage.black_level, minValue = 0, maxValue = 5)
-  val _gravity = new TypeEditorInt("Gravity", currentStage.gravity, minValue = 0, maxValue = 1800)
-  val _lock = new TypeEditorInt("Lockdown", currentStage.lock, minValue = 1)
+  var stageMenu = false
+  var stageMenuCursor = 0
   
-  val fieldList: Array[TypeEditor[_]] = Array(
-    _field, _mino_num, _mino_set, _bomb_frequency, _bomb_offset, _allbomb_frequency, _allbomb_offset,
-    _white_frequency, _white_offset, _white_level, _black_frequency, _black_offset, _black_level, _gravity, _lock
-  )
+  var _field: TypeEditorField = _
+  var _mino_num: TypeEditorInt = _
+  var _mino_set: TypeEditorMinoSet = _
+  var _bomb_frequency: TypeEditorInt = _
+  var _bomb_offset: TypeEditorInt = _
+  var _allbomb_frequency: TypeEditorInt = _
+  var _allbomb_offset: TypeEditorInt = _
+  var _white_frequency: TypeEditorInt = _
+  var _white_offset: TypeEditorInt = _
+  var _white_level: TypeEditorInt = _
+  var _black_frequency: TypeEditorInt = _
+  var _black_offset: TypeEditorInt = _
+  var _black_level: TypeEditorInt = _
+  var _gravity: TypeEditorInt = _
+  var _lock: TypeEditorInt = _
+  
+  var fieldList: Array[TypeEditor[_]] = _
+  
+  loadStage()
+  
+  def loadStage() {
+    currentStage = stage.stages(currentStageId)
+    _field = new TypeEditorField("Field", currentStage.field, 
+    List(List.range(1, 36 + 1), List.range(69, 80 + 1), List(64)).flatten)
+    _mino_num = new TypeEditorInt("Number of Mino(s)", currentStage.mino_num, minValue = 1)
+    _mino_set = new TypeEditorMinoSet("Available Mino Set", currentStage.mino_set)
+    _bomb_frequency = new TypeEditorInt("Bomb Frequency", currentStage.bomb_frequency, minValue = 0)
+    _bomb_offset = new TypeEditorInt("Bomb Offset", currentStage.bomb_offset, minValue = 0)
+    _allbomb_frequency = new TypeEditorInt("All Bomb Mino Frequency", currentStage.allbomb_frequency, minValue = 0)
+    _allbomb_offset = new TypeEditorInt("All Bomb Mino Offset", currentStage.allbomb_offset, minValue = 0)
+    _white_frequency = new TypeEditorInt("White Mino Frequency", currentStage.white_frequency, minValue = 0)
+    _white_offset = new TypeEditorInt("White Mino Offset", currentStage.white_offset, minValue = 0)
+    _white_level = new TypeEditorInt("White Mino Level", currentStage.white_level, minValue = 0, maxValue = 5)
+    _black_frequency = new TypeEditorInt("Black Mino Frequency", currentStage.black_frequency, minValue = 0)
+    _black_offset = new TypeEditorInt("Black Mino Offset", currentStage.black_offset, minValue = 0)
+    _black_level = new TypeEditorInt("Black Mino Level", currentStage.black_level, minValue = 0, maxValue = 5)
+    _gravity = new TypeEditorInt("Gravity", currentStage.gravity, minValue = 0, maxValue = 1800)
+    _lock = new TypeEditorInt("Lockdown", currentStage.lock, minValue = 1)
+    fieldList = Array(
+      _field, _mino_num, _mino_set, _bomb_frequency, _bomb_offset, _allbomb_frequency, _allbomb_offset,
+      _white_frequency, _white_offset, _white_level, _black_frequency, _black_offset, _black_level, _gravity, _lock
+    )
+  }
   
   def make() = BombContestStage(
       _mino_num.value,
@@ -72,6 +99,14 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
       _field.value
   )
   
+  def empty() = BombContestStage(100, List(4, 5, 6, 7, 8, 9, 10), 1, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 60, List.fill(22)(Array.fill(10)(0)))
+  
+  def clone(from: BombContestStage) = {
+    var newField = List.fill(22)(Array.fill(10)(0))
+    for(iy <- 0 until from.field.size; ix <- 0 until 10) newField(iy)(ix) = from.field(iy)(ix)
+    from.copy(mino_set = from.mino_set.toList, field = newField)
+  }
+  
   def update(i: Input) {
     var current = if(cursor >= 0 && cursor < fieldList.size) fieldList(cursor) else null
     if(detailedEditor){
@@ -79,8 +114,77 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
       if(i.isKeyPressed(Input.KEY_ESCAPE)) detailedEditor = false
     } else if(testplay) {
       wrapper.update()
+    } else if(stageMenu) {
+      if(i.isKeyPressed(Input.KEY_UP) && stageMenuCursor >= 1) {
+        stageMenuCursor -= 1
+        stage.stages(currentStageId) = make()
+        currentStageId = stageMenuCursor
+        loadStage()
+      }
+      if(i.isKeyPressed(Input.KEY_DOWN) && stageMenuCursor < stage.stages.size - 1) {
+        stageMenuCursor += 1
+        stage.stages(currentStageId) = make()
+        currentStageId = stageMenuCursor
+        loadStage()
+      }
+      if(i.isKeyPressed(Input.KEY_ENTER)) {
+        stage.stages(currentStageId) = make()
+        currentStageId = stageMenuCursor
+        loadStage()
+        stageMenu = false
+      }
+      if(i.isKeyPressed(Input.KEY_A)) {
+        stage.stages = stage.stages :+ empty()
+        loadStage()
+      }
+      if(i.isKeyPressed(Input.KEY_I)) {
+        // New
+        var result = stage.stages :+ null
+        for(i <- result.size - 2 to stageMenuCursor by -1){
+          result(i + 1) = result(i)
+        }
+        result(stageMenuCursor) = empty()
+        stage.stages = result
+        loadStage()
+      }
+      if(i.isKeyPressed(Input.KEY_C)) {
+        // Copy
+        var result = stage.stages :+ null
+        for(i <- result.size - 2 to stageMenuCursor by -1){
+          result(i + 1) = result(i)
+        }
+        result(stageMenuCursor) = clone(result(stageMenuCursor + 1))
+        stage.stages = result
+        loadStage()
+      }
+      if(i.isKeyPressed(Input.KEY_D)) {
+        // Delete
+        var result = stage.stages.toArray
+        if(stageMenuCursor < result.size - 1){
+          for(i <- stageMenuCursor to result.size - 2 by -1){
+            result(i) = result(i + 1)
+          }
+        }
+        result = result.init
+        stage.stages = result
+        if(stageMenuCursor >= result.size) stageMenuCursor = result.size - 1
+        if(currentStageId >= stage.stages.size) currentStageId = stage.stages.size - 1
+        loadStage()
+      }
     } else {
       if(current != null) current.update(i)
+      if(cursor == -2) {
+        if(i.isKeyPressed(Input.KEY_LEFT) && currentStageId >= 1) {
+          stage.stages(currentStageId) = make()
+          currentStageId -= 1
+          loadStage()
+        }
+        if(i.isKeyPressed(Input.KEY_RIGHT) && currentStageId < stage.stages.size - 1) {
+          stage.stages(currentStageId) = make()
+          currentStageId += 1
+          loadStage()
+        }
+      }
       if(i.isKeyPressed(Input.KEY_UP) && cursor >= -2) cursor -= 1
       if(i.isKeyPressed(Input.KEY_DOWN) && cursor < fieldList.size - 1) cursor += 1
       if(i.isKeyPressed(Input.KEY_ENTER)) {
@@ -89,7 +193,9 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
             
           }
           case -2 => {
-            
+            stage.stages(currentStageId) = make()
+            stageMenuCursor = currentStageId
+            stageMenu = true
           }
           case -1 => {
             wrapper = new GameWrapper(0, new Control(i)) {
@@ -109,7 +215,12 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
       }
       if(i.isKeyPressed(Input.KEY_F1)) {
         implicit val format =  DefaultFormats
-        println(Serialization.write(make()))
+        stage.stages(currentStageId) = make()
+        val output = Serialization.write(stage)
+        
+        val writer = new FileWriter(file, false);
+        writer.write(output);
+        writer.close();
       }
     }
   }
@@ -122,12 +233,12 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
       wrapper.render(g)
     } else {
       Resource.boldfont.drawString("Editor", 400, 16, TextAlign.CENTER, new Color(1f, 0.2f, 0.8f))
-      Resource.boldfont.drawString("Filename.***", 16, 16, TextAlign.LEFT, new Color(1f, 0.2f, 0.8f))
+      Resource.boldfont.drawString(file.getName(), 16, 16, TextAlign.LEFT, new Color(1f, 0.2f, 0.8f))
       Resource.boldfont.drawString("[BombContest]", 800 - 16, 16, TextAlign.RIGHT, new Color(1f, 0.2f, 0.8f))
       Resource.hr.draw(16, 32 + 2, 800 - 16, 32 + 6, 0, 0, 8, 4, new Color(1f, 0.2f, 0.8f))
       Resource.boldfont.drawString("Global Config", 32, 48,
           color = if(cursor == -3) new Color(1f, 1f, 1f) else new Color(0.8f, 0.8f, 0.8f))
-      Resource.boldfont.drawString(s"Stage: ${currentStageId + 1} / ${file.stages.size}", 32, 64,
+      Resource.boldfont.drawString(s"Stage: ${currentStageId + 1} / ${stage.stages.size}", 32, 64,
           color = if(cursor == -2) new Color(1f, 1f, 1f) else new Color(0.8f, 0.8f, 0.8f))
       Resource.boldfont.drawString("TEST PLAY", 32, 96,
           color = if(cursor == -1) new Color(1f, 1f, 1f) else new Color(0.8f, 0.8f, 0.8f))
@@ -141,6 +252,8 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
         case -1 => 96
         case _ => 128 + cursor * 16
       })
+      Resource.hr.draw(16, 600 - 32 - 6, 800 - 16, 600 - 32 - 2, 0, 0, 8, 4, new Color(1f, 1f, 1f))
+      Resource.boldfont.drawString("F1 - Save", 16, 600 - 32, TextAlign.LEFT, new Color(1f, 1f, 1f))
       
       g.pushTransform()
       g.translate(400, 0)
@@ -153,6 +266,13 @@ class EditorBombContest(var file: StageFileBombContest) extends Editor with Comm
       g.popTransform()
       
       if(detailedEditor) fieldList(cursor).renderDetailedEditor(g)
+      if(stageMenu) {
+        g.setColor(new Color(0f, 0f, 0f, 0.8f))
+        g.fillRect(0, 0, 800, 600)
+        Resource.boldfont.drawString(s"Stage: ${stageMenuCursor + 1} / ${stage.stages.size}", 64, 64)
+        Resource.hr.draw(16, 600 - 32 - 6, 800 - 16, 600 - 32 - 2, 0, 0, 8, 4, new Color(1f, 1f, 1f))
+        Resource.boldfont.drawString("A - Add, I - Insert, C - Copy, D - Delete", 16, 600 - 32, TextAlign.LEFT, new Color(1f, 1f, 1f))
+      }
     }
   }
 }
@@ -205,7 +325,7 @@ class TypeEditorMinoSet(val displayName: String, var value: List[Int]) extends T
   updateList()
   
   def updateList() {
-    value = value.toList.sortWith((a, b) => a < b)
+    value = set.toList.sortWith((a, b) => a < b)
   }
   
   override def valueString = value.mkString(",")

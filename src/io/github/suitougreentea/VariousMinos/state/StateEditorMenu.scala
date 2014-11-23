@@ -33,7 +33,7 @@ class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int): Unit = {
       implicit val formats = DefaultFormats
       val json = JsonParser.parse(new FileReader("stage/contest.json"), false)
-      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(json.extract[StageFileBombContest])
+      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(new File("stage/contest.json"), json.extract[StageFileBombContest])
       sbg.enterState(1)
     
     
@@ -42,9 +42,11 @@ class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
       val chooser = new JFileChooser()
       chooser.setCurrentDirectory(new File(".").getAbsoluteFile().getParentFile())
       chooser.showOpenDialog(null)
+      val reader = new FileReader(chooser.getSelectedFile())
       implicit val formats = DefaultFormats
-      val json = JsonParser.parse(new FileReader(chooser.getSelectedFile()), false)
-      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(json.extract[StageFileBombContest])
+      val json = JsonParser.parse(reader, false)
+      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(chooser.getSelectedFile(), json.extract[StageFileBombContest])
+      reader.close()
       sbg.enterState(1)
     }
     i.clearKeyPressedRecord()

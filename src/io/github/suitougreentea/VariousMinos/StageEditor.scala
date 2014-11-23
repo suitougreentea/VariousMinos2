@@ -7,6 +7,7 @@ import javax.swing.JFileChooser
 import io.github.suitougreentea.VariousMinos.state.StateEditor
 import io.github.suitougreentea.VariousMinos.state.StateEditorMenu
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombContest
+import java.io.File
 
 object StageEditor {
   def main(args: Array[String]) {

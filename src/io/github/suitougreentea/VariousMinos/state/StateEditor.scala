@@ -11,12 +11,15 @@ import io.github.suitougreentea.VariousMinos.GameStageEditor
 
 class StateEditor(@BeanProperty val ID: Int) extends BasicGameState {
   var editor: Editor = _
+  var loaded = false
   
   def init(gc: GameContainer, sbg: StateBasedGame) = {
   }
   
   override def enter(gc: GameContainer, sbg: StateBasedGame) = {
+    //loaded = false
     editor = sbg.asInstanceOf[GameStageEditor].editor
+    //loaded = true
   }
 
   def render(gc: GameContainer, sbg: StateBasedGame, g: Graphics) = {

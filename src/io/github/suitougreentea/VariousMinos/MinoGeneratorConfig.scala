@@ -25,6 +25,6 @@ class MinoGeneratorConfigBombInfinite(
 ) extends MinoGeneratorConfigInfinite {
 }
 
-class MinoGeneratorConfigBombFinite(val list: List[BombPuzzleMinoList]) extends MinoGeneratorConfigFinite {
+class MinoGeneratorConfigBombFinite(val list: Array[BombPuzzleMinoList]) extends MinoGeneratorConfigFinite {
   
 }

@@ -5,7 +5,7 @@ import org.newdawn.slick.Graphics
 import org.lwjgl.opengl.GL11
 
 trait CommonRenderer {
-  def graphicId(block: Block): Int = block.id
+  def graphicId(id: Int): Int = id
   //def graphicId(block: Block): Int
   
   def drawBlockByGraphicId(g: Graphics)(id: Int, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
@@ -19,13 +19,13 @@ trait CommonRenderer {
   
   def drawBlock(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, transparency: Float = 1f) {
     if(block == null) return
-    var id = graphicId(block)
+    var id = graphicId(block.id)
     drawBlockByGraphicId(g)(id, x, y, small, transparency)
   }
   
   def drawBlockBrighten(g: Graphics)(block: Block, x: Int, y: Int, small: Boolean = false, brightness: Float = 0f) {
     if(block == null) return
-    var id = graphicId(block)
+    var id = graphicId(block.id)
     var sbx: Int = id % 64
     var sby: Int = id / 64
     var sx = sbx * 16
@@ -87,7 +87,7 @@ trait CommonRenderer {
 }
 
 trait CommonRendererBomb extends CommonRenderer {
-  def graphicId(id: Int): Int = {
+  override def graphicId(id: Int): Int = {
     if(0 <= id && id < 64) id
     else if(id == 64) 128
     else if(id == 65) 129

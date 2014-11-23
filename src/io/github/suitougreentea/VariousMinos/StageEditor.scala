@@ -8,6 +8,7 @@ import io.github.suitougreentea.VariousMinos.state.StateEditor
 import io.github.suitougreentea.VariousMinos.state.StateEditorMenu
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombContest
 import java.io.File
+import io.github.suitougreentea.VariousMinos.editor.Editor
 
 object StageEditor {
   def main(args: Array[String]) {
@@ -20,7 +21,7 @@ object StageEditor {
 }
 
 class GameStageEditor(val name: String) extends StateBasedGame(name) {
-  var editor: Editor = _
+  var editor: Editor[_] = _
   this.addState(new StateEditorMenu(0))
   this.addState(new StateEditor(1))
   this.enterState(0)

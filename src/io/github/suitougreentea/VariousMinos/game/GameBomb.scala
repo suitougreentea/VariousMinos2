@@ -20,8 +20,9 @@ import scala.collection.mutable.HashSet
 import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
 import io.github.suitougreentea.VariousMinos.rule.Rule
+import io.github.suitougreentea.VariousMinos.CommonRendererBomb
 
-class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rule) extends Game with CommonRenderer {
+class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rule) extends Game with CommonRendererBomb {
   val _this = this
   var field = new Field(rule)
   
@@ -586,7 +587,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     handler.render(this, g)
   }
     
-  override def graphicId(block: Block): Int = {
+  /*override def graphicId(): Int = {
     var id = block.id
     if(0 <= id && id < 64) id
     else if(id == 64) 128
@@ -596,5 +597,5 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     else if(id == 68) 194
     else if(69 <= id && id <= 86) (id - 69) + 133
     else id
-  }
+  }*/
 }

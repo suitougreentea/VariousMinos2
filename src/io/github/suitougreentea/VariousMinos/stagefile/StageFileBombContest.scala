@@ -1,16 +1,14 @@
 package io.github.suitougreentea.VariousMinos.stagefile
 
-import scala.collection.mutable.HashSet
-
 case class StageFileBombContest (
   var `type`: String = "BombContest",
   var version: Int = 0,
   var stages: Array[BombContestStage]
-) {
+) extends StageFile[BombContestStage] {
   assert(`type` == "BombContest")
 }
 
-case class BombContestStage(
+case class BombContestStage (
   var mino_num: Int,
   var mino_set: List[Int],
   var bomb_frequency: Int,
@@ -26,5 +24,5 @@ case class BombContestStage(
   var gravity: Int,
   var lock: Int,
   var field: List[Array[Int]]
-) {
+) extends Stage {
 }

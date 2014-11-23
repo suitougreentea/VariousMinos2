@@ -11,12 +11,14 @@ import java.io.FileReader
 import net.liftweb.json.JsonParser
 import java.io.File
 import io.github.suitougreentea.VariousMinos.Resource
-import io.github.suitougreentea.VariousMinos.Editor
 import io.github.suitougreentea.VariousMinos.GameStageEditor
-import io.github.suitougreentea.VariousMinos.EditorBombContest
+import io.github.suitougreentea.VariousMinos.editor.Editor
+import io.github.suitougreentea.VariousMinos.editor.EditorBombContest
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombContest
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
+import io.github.suitougreentea.VariousMinos.editor.EditorBombPuzzle
+import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombPuzzle
 
 class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
   def init(gc: GameContainer, sbg: StateBasedGame) = {
@@ -32,8 +34,10 @@ class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
 
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int): Unit = {
       implicit val formats = DefaultFormats
-      val json = JsonParser.parse(new FileReader("stage/contest.json"), false)
-      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(new File("stage/contest.json"), json.extract[StageFileBombContest])
+      //val json = JsonParser.parse(new FileReader("stage/contest.json"), false)
+      //sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(new File("stage/contest.json"), json.extract[StageFileBombContest])
+      val json = JsonParser.parse(new FileReader("stage/puzzle.json"), false)
+      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombPuzzle(new File("stage/puzzle.json"), json.extract[StageFileBombPuzzle])
       sbg.enterState(1)
     
     

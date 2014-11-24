@@ -142,6 +142,21 @@ class TypeEditorMinoList(val displayName: String, var value: Array[BombPuzzleMin
   
   var cursorX, cursorY = 0
   
+  // value <-> minos (prevent from generating instance every frame)
+  // value -> minos
+  var minos = Array.tabulate(value.length)(j => {
+    var e = value(j)
+    new EditorMino(e.id, e.`type`, e.bomb)
+  })
+   
+  // minos -> value
+  def updateValue() {
+    value = Array.tabulate(minos.length)(j => {
+      var e = minos(j)
+      new BombPuzzleMinoList(e.id, e.`type`, e.bomb)
+    })
+  }
+  
   override def updateDetailedEditor(i: Input) {
     if(i.isKeyPressed(Input.KEY_DOWN) && cursorY < value.length - 1) cursorY += 1
     if(i.isKeyPressed(Input.KEY_UP) && cursorY >= 1) cursorY -= 1
@@ -149,48 +164,80 @@ class TypeEditorMinoList(val displayName: String, var value: Array[BombPuzzleMin
     if(i.isKeyPressed(Input.KEY_RIGHT) && cursorX < 2) cursorX += 1
     if(i.isKeyPressed(Input.KEY_Z)){
       cursorX match {
-        case 0 => if(value(cursorY).id >= 1) value(cursorY).id -= 1
-        case 1 => if(value(cursorY).`type` >= 1) value(cursorY).`type` -= 1
-        case 2 => if(value(cursorY).bomb >= 0) value(cursorY).bomb -= 1
+        case 0 => if(minos(cursorY).id >= 1){
+          minos(cursorY).id -= 1
+          if(minos(cursorY).bomb >= MinoList.numBlocks(minos(cursorY).id)) minos(cursorY).bomb = MinoList.numBlocks(minos(cursorY).id) - 1
+        }
+        case 1 => if(minos(cursorY).`type` >= 1) minos(cursorY).`type` -= 1
+        case 2 => if(minos(cursorY).bomb >= 0) minos(cursorY).bomb -= 1
       }
+      minos(cursorY).updateMino()
+      updateValue()
     }
     if(i.isKeyPressed(Input.KEY_X)){
       cursorX match {
-        case 0 => if(value(cursorY).id <= 27) value(cursorY).id += 1
-        case 1 => if(value(cursorY).`type` <= 11) value(cursorY).`type` += 1
-        case 2 => if(value(cursorY).bomb <= 3) value(cursorY).bomb += 1
+        case 0 => if(minos(cursorY).id <= 27){
+          minos(cursorY).id += 1
+          if(minos(cursorY).bomb >= MinoList.numBlocks(minos(cursorY).id)) minos(cursorY).bomb = MinoList.numBlocks(minos(cursorY).id) - 1
+        }
+        case 1 => if(minos(cursorY).`type` <= 12) minos(cursorY).`type` += 1
+        case 2 => if(minos(cursorY).bomb < MinoList.numBlocks(minos(cursorY).id) - 1) minos(cursorY).bomb += 1
       }
+      minos(cursorY).updateMino()
+      updateValue()
     }
     if(i.isKeyPressed(Input.KEY_N)){
-      value = value :+ new BombPuzzleMinoList(0, 0, 0)
+      minos = minos :+ new EditorMino(0, 0, -1)
+      updateValue()
     }
     if(i.isKeyPressed(Input.KEY_I)){
+      minos = minos :+ null
+      for(i <- minos.length - 2 to cursorY by -1){
+        minos(i + 1) = minos(i)
+      }
+      minos(cursorY) = new EditorMino(0, 0, -1)
+      updateValue()
     }
-    if(i.isKeyPressed(Input.KEY_D)){
-      
+    if(i.isKeyPressed(Input.KEY_D) && minos.length > 1){
+      if(cursorY < minos.size - 1){
+        for(i <- cursorY to minos.size - 2 by -1){
+          minos(i) = minos(i + 1)
+        }
+      }
+      minos = minos.init
+      cursorY -= 1
+      updateValue()
     }
   }
   override def renderDetailedEditor(g: Graphics) {
     g.pushTransform()
-    g.translate(400, 32)
-    for(e <- value) {
-      Resource.boldfont.drawString(e.id.toString(), 0, 0)
-      Resource.boldfont.drawString(e.`type`.toString(), 24, 0)
-      Resource.boldfont.drawString(e.bomb.toString(), 48, 0)
+    g.translate(400, 64)
+    for(e <- minos) {
+      Resource.boldfont.drawString(e.id.toString(), 0, -16)
+      Resource.boldfont.drawString(e.`type`.toString(), 24, -16)
+      Resource.boldfont.drawString(e.bomb.toString(), 48, -16)
       g.translate(72, 0)
-      var num = MinoList.numBlocks(e.id)
-      var array = e.`type` match {
-        case 0 => Array.fill(num)(new Block(1))
-        case 1 => Array.fill(num)(new Block(64))
-        case 2 | 3 | 4 | 5 | 6 | 7 => Array.fill(num)(new Block(69 + e.`type` - 2))
-        case 8 | 9 | 10 | 11 | 12 | 13 => Array.fill(num)(new Block(75 + e.`type` - 8))
-      }
-      if(e.bomb >= 0) array(e.bomb) = new Block(64)
-      var mino = new Mino(e.id, 0, array)
-      drawNextMino(g)(mino, true, 1f)
+
+      drawNextMino(g)(e.mino, true, 1f)
       g.translate(-72, 32)
     }
     g.popTransform()
-    Resource.boldfont.drawString(">" ,400 + cursorX * 24 - 8, 32 + cursorY * 32)
+    Resource.boldfont.drawString(">" ,400 + cursorX * 24 - 8, 48 + cursorY * 32)
+  }
+  
+  class EditorMino(var id: Int, var `type`: Int, var bomb: Int){
+    var mino: Mino = _
+    updateMino()
+    def updateMino() {
+      var num = MinoList.numBlocks(id)
+      var array = `type` match {
+        case 0 => Array.fill(num)(new Block(1))
+        case 1 => Array.fill(num)(new Block(64))
+        case 2 | 3 | 4 | 5 | 6 | 7 => Array.fill(num)(new Block(69 + `type` - 2))
+        case 8 | 9 | 10 | 11 | 12 | 13 => Array.fill(num)(new Block(75 + `type` - 8))
+      }
+      if(bomb >= 0) array(bomb) = new Block(64)
+      mino = new Mino(id, 0, array)
+    }
   }
 }

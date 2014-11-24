@@ -12,6 +12,7 @@ import io.github.suitougreentea.VariousMinos.game.Game
 import io.github.suitougreentea.VariousMinos.game.HandlerBombPuzzle
 import io.github.suitougreentea.VariousMinos.rule.RuleStandard
 import io.github.suitougreentea.VariousMinos.CommonRendererBomb
+import io.github.suitougreentea.VariousMinos.stagefile.BombPuzzleMinoList
 
 class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends Editor[BombPuzzleStage](file, stage) with CommonRendererBomb {
   var _mino_list: TypeEditorMinoList = _
@@ -35,7 +36,7 @@ class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends E
     fieldList = Array(_field, _mino_list, _gravity, _lock)
   }
 
-  def empty(): BombPuzzleStage = BombPuzzleStage(Array.empty, 1, 60, List.fill(22)(Array.fill(10)(0)))
+  def empty(): BombPuzzleStage = BombPuzzleStage(Array(new BombPuzzleMinoList(0, 0, -1)), 1, 60, List.fill(22)(Array.fill(10)(0)))
 
   def make(): BombPuzzleStage = BombPuzzleStage(
       _mino_list.value,

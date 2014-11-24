@@ -93,7 +93,7 @@ abstract class Editor[T <: Stage](file: File, stage: StageFile[T])(implicit ct: 
         stage.stages = result
         loadStage()
       }
-      if(i.isKeyPressed(Input.KEY_D)) {
+      if(i.isKeyPressed(Input.KEY_D) && stage.stages.length > 1) {
         // Delete
         var result = stage.stages.toArray
         if(stageMenuCursor < result.size - 1){

@@ -18,6 +18,10 @@ class Block (var id: Int){
     case 81 | 82 | 83 | 84 | 85 | 86 => true
     case _ => false
   }
+  var unerasable = id match {
+    case 74 | 80 | 86 => true
+    case _ => false
+  }
   var active = false
   var filled = false
 }

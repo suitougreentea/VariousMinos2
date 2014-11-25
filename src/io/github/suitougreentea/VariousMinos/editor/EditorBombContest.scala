@@ -92,7 +92,7 @@ class EditorBombContest(var file: File, var stage: StageFileBombContest) extends
     from.copy(mino_set = from.mino_set.toList, field = newField)
   }
   
-  def testPlayGame = new GameBomb(wrapper, new HandlerBombContest(make()), new RuleStandard())
+  def testPlayGame = new GameBomb(wrapper, new HandlerBombContest(-1, make()), new RuleStandard())
   
   def childRender(g: Graphics) {
       g.pushTransform()

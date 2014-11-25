@@ -19,6 +19,7 @@ trait HandlerBomb {
   def render(game: GameBomb, g: Graphics) {}
   def allClear(game: GameBomb) {}
   def stuck(game: GameBomb) { game.wrapper.exit(0) }
+  def beforeNewMino(game: GameBomb) {}
   def noNewMino(game: GameBomb) { game.wrapper.exit(0) }
   def newMino(game: GameBomb) {}
   def fillLine(game: GameBomb, hit: Int, chain: Int, freeze: Boolean) {}
@@ -32,7 +33,10 @@ class HandlerBombEndless extends HandlerBomb {
   }
 }
 
-class HandlerBombContest(val stage: BombContestStage) extends HandlerBomb {
+class HandlerBombContest(val stageId: Int, val stage: BombContestStage) extends HandlerBomb {
+  val bonus = Array(0, 0, 0, 0, 2, 5, 10, 20, 50, 100, 150, 200, 300, 400, 600, 800, 1000, 1000, 1000, 1000, 1000, 1000, 1000)
+  var numMino = -1
+  
   def init(game: GameBomb){
     for(iy <- 0 until stage.field.size; ix <- 0 until 10){
       game.field(ix, iy) = new Block(stage.field(iy)(ix))
@@ -50,14 +54,41 @@ class HandlerBombContest(val stage: BombContestStage) extends HandlerBomb {
       blackOffset = stage.black_offset,
       blackLevel = stage.black_level
     )
-    game.field.generator = new MinoGeneratorBombInfinite(game.rule, generatorConfig) 
+    game.field.generator = new MinoGeneratorBombInfinite(game.rule, generatorConfig)
+    numMino = stage.mino_num
+  }
+  override def render(game: GameBomb, g: Graphics) {
+    Resource.boldfont.drawString((stageId + 1).toString(), 384, 512, TextAlign.RIGHT)
+    Resource.boldfont.drawString(numMino.toString(), 384, 488, TextAlign.RIGHT)
   }
   override def allClear(game: GameBomb) {
     game.wrapper.exit(1)
   }
+  override def fillLine(game: GameBomb, hit: Int, chain: Int, freeze: Boolean){
+    if(!freeze || chain == 0) {
+      numMino += bonus(hit)
+      if(hit >= 4) game.nextAllBombFlag = true
+    }
+  }
+  override def afterBomb(game: GameBomb, eraseBlocks: Int) {
+
+  }
+  override def beforeNewMino(game: GameBomb) {
+    numMino -= 1
+    if(numMino < 0) game.wrapper.exit(0)
+    val field = game.field
+    var num = 0
+    for(iy <- 0 until field.height; ix <- 0 until 10) {
+      if(field(ix, iy).id != 0 && !field(ix, iy).unerasable) num += 1
+    }
+    if(num <= 10) game.nextAllBombFlag = true
+  }
+  override def makeBigBomb(game: GameBomb, num: Int){
+    numMino += num
+  }
 }
 
-class HandlerBombPuzzle(val stage: BombPuzzleStage) extends HandlerBomb {
+class HandlerBombPuzzle(val stageId: Int, val stage: BombPuzzleStage) extends HandlerBomb {
   def init(game: GameBomb) {
     for(iy <- 0 until stage.field.size; ix <- 0 until 10){
       game.field(ix, iy) = new Block(stage.field(iy)(ix))

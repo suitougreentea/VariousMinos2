@@ -71,7 +71,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     var afterTime = 0
     override def handleAfterBefore(executer: PhaseExecuter) {
       val c = wrapper.control
-      
+      handler.beforeNewMino(_this)
       fallCounter = 0
 			softDropCounter = 0
 			lockdownTimer = 0
@@ -81,11 +81,18 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         handler.noNewMino(_this)
       } else {
         field.newMino()
+        if(nextAllBombFlag) {
+          field.currentMino = new Mino(field.currentMino.minoId, field.rule.spawn.getRotation(field.currentMino.minoId), new Block(64))
+        }
         handler.newMino(_this)
       }
       
       if(c.down(Buttons.C) && !c.pressed(Buttons.C) && rule.enableInitialHold){
-        field.hold()
+        if(field.hold()) {
+          if(nextAllBombFlag) {
+            field.currentMino = new Mino(field.currentMino.minoId, field.rule.spawn.getRotation(field.currentMino.minoId), new Block(64))
+          }
+        }
       }
       if(c.down(Buttons.LEFT) && !c.pressed(Buttons.LEFT) && rule.enableInitialMove){
         field.moveMinoLeft()
@@ -193,7 +200,11 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       }
 
       if(c.pressed(Buttons.C)){
-			  field.hold()
+			  if(field.hold()) {
+          if(nextAllBombFlag) {
+            field.currentMino = new Mino(field.currentMino.minoId, field.rule.spawn.getRotation(field.currentMino.minoId), new Block(64))
+          }   
+        }
 			  fallCounter = 0
 			  softDropCounter = 0
 			  lockdownTimer = 0
@@ -212,6 +223,9 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
         lockdownTimer += 1
         forceLockdownTimer += 1
       }
+    }
+    override def handleBeforeAfter(executer: PhaseExecuter) {
+      nextAllBombFlag = false
     }
   }
 
@@ -407,7 +421,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       chain = 0
       var flag = false
       for(iy <- 0 until field.height; ix <- 0 until 10){
-        if(field(ix, iy).id != 0) flag = true
+        if(field(ix, iy).id != 0 && !field(ix, iy).unerasable) flag = true
       }
       if(flag){
         searchBigBomb()
@@ -476,6 +490,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
   private var chain = 0
   
   var allEraseFlag = false
+  var nextAllBombFlag = false
   
   handler.init(this)
   field.init()

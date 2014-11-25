@@ -59,5 +59,5 @@ class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends E
       g.popTransform()
   }
 
-  def testPlayGame(): Game = new GameBomb(wrapper, new HandlerBombPuzzle(make()), new RuleStandard())
+  def testPlayGame(): Game = new GameBomb(wrapper, new HandlerBombPuzzle(-1, make()), new RuleStandard())
 }

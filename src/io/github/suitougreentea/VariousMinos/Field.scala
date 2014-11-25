@@ -129,12 +129,15 @@ class Field(var rule: Rule) {
     alreadyHolded = false
   }
   
-  def hold(){
+  // returns true if this function generated new mino
+  def hold(): Boolean = {
+    var result = false
     if(rule.enableHold) {
       if(!alreadyHolded){
         if(holdMino == null){
           holdMino = currentMino
           newMino()
+          result = true
         } else {
           var temp = currentMino
           currentMino = holdMino
@@ -153,6 +156,7 @@ class Field(var rule: Rule) {
         alreadyHolded = true
       }
     }
+    return result
   }
   
   def checkHit(field: Field = this, mino: Mino = currentMino,

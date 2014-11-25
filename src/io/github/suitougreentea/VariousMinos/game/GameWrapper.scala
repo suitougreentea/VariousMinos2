@@ -223,10 +223,10 @@ class GameWrapper(val side: Int, val control: Control) {
     var handler = mode match {
       case 0 => new HandlerBombEndless()
       case 1 => {
-        new HandlerBombContest(bombContestStage.stages(stage))
+        new HandlerBombContest(stage, bombContestStage.stages(stage))
       }
       case 2 => {
-        new HandlerBombPuzzle(bombPuzzleStage.stages(stage))
+        new HandlerBombPuzzle(stage, bombPuzzleStage.stages(stage))
       }
       case 4 => difficulty match {
         case 0 => new HandlerBombSurvivalEasy()

@@ -19,6 +19,10 @@ import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import io.github.suitougreentea.VariousMinos.editor.EditorBombPuzzle
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombPuzzle
+import net.liftweb.json.JsonAST
+import net.liftweb.json.JsonDSL
+import net.liftweb.json.JsonAST.JValue
+import net.liftweb.json.JsonAST.JString
 
 class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
   def init(gc: GameContainer, sbg: StateBasedGame) = {
@@ -29,27 +33,28 @@ class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
   }
 
   def render(gc: GameContainer, sbg: StateBasedGame, g: Graphics) = {
-    Resource.boldfont.drawString("Press Enter", 0, 0)
+    Resource.boldfont.drawString("Open...", 48, 32)
+    Resource.boldfont.drawString(">", 32, 32)
   }
 
   def update(gc: GameContainer, sbg: StateBasedGame, d: Int): Unit = {
-      implicit val formats = DefaultFormats
-      //val json = JsonParser.parse(new FileReader("stage/contest.json"), false)
-      //sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(new File("stage/contest.json"), json.extract[StageFileBombContest])
-      val json = JsonParser.parse(new FileReader("stage/puzzle.json"), false)
-      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombPuzzle(new File("stage/puzzle.json"), json.extract[StageFileBombPuzzle])
-      sbg.enterState(1)
-    
-    
     val i = gc.getInput()
     if(i.isKeyPressed(Input.KEY_ENTER)) {
       val chooser = new JFileChooser()
       chooser.setCurrentDirectory(new File(".").getAbsoluteFile().getParentFile())
       chooser.showOpenDialog(null)
-      val reader = new FileReader(chooser.getSelectedFile())
+      
+      val file = chooser.getSelectedFile()
+      val reader = new FileReader(file)
+      
       implicit val formats = DefaultFormats
       val json = JsonParser.parse(reader, false)
-      sbg.asInstanceOf[GameStageEditor].editor = new EditorBombContest(chooser.getSelectedFile(), json.extract[StageFileBombContest])
+      
+      sbg.asInstanceOf[GameStageEditor].editor = (json \ "type").asInstanceOf[JString].s match {
+        case "BombContest" => new EditorBombContest(file, json.extract[StageFileBombContest])
+        case "BombPuzzle" => new EditorBombPuzzle(file, json.extract[StageFileBombPuzzle])
+      }
+      
       reader.close()
       sbg.enterState(1)
     }

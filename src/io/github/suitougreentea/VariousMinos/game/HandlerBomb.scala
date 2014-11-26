@@ -95,6 +95,7 @@ class HandlerBombPuzzle(val stageId: Int, val stage: BombPuzzleStage) extends Ha
     }
     game.rule.enableHold = false
     game.field.generator = new MinoGeneratorBombFinite(game.rule, new MinoGeneratorConfigBombFinite(stage.mino_list)) 
+    game.nextMinoDisplayType = 1
   }
   
   override def allClear(game: GameBomb) {

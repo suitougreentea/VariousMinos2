@@ -21,6 +21,7 @@ import io.github.suitougreentea.VariousMinos.Buttons
 import io.github.suitougreentea.VariousMinos.MinoGeneratorBombInfinite
 import io.github.suitougreentea.VariousMinos.rule.Rule
 import io.github.suitougreentea.VariousMinos.CommonRendererBomb
+import io.github.suitougreentea.util.TextAlign
 
 class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rule) extends Game with CommonRendererBomb {
   val _this = this
@@ -48,7 +49,14 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     
     def procedureWorking(executer: PhaseExecuter){
       val c = wrapper.control
-      if(c.pressed(Buttons.A)) executer.enterPhase(phaseMoving, true)
+      if(c.pressed(Buttons.A)) {
+        nextMinoDisplayCursor = 0
+        executer.enterPhase(phaseMoving, true)
+      }
+      if(nextMinoDisplayType == 1) {
+        if(c.pressed(Buttons.UP) && nextMinoDisplayCursor > 0) nextMinoDisplayCursor -= 1
+        if(c.pressed(Buttons.DOWN) && nextMinoDisplayCursor + 6 < field.generator.size) nextMinoDisplayCursor += 1 
+      }
     }
     
     override def procedureAfter(executer: PhaseExecuter) {
@@ -492,6 +500,11 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
   var allEraseFlag = false
   var nextAllBombFlag = false
   
+  // 0: Normal, 1: Puzzle
+  var nextMinoDisplayType = 0
+  // use if type=1
+  var nextMinoDisplayCursor = 0
+  
   handler.init(this)
   field.init()
   var executer: PhaseExecuter = new PhaseExecuter(phaseReady)
@@ -551,25 +564,51 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     }
     g.popTransform()
     
-    if(rule.numNext >= 1 && !field.generator(0).isEmpty) {
-      g.pushTransform()
-      g.translate(216, 136)
-      drawNextMino(g)(field.generator(0).get)
-      g.popTransform()
+    nextMinoDisplayType match {
+      case 0 => {
+        if(rule.numNext >= 1 && !field.generator(0).isEmpty) {
+          g.pushTransform()
+          g.translate(216, 136)
+          drawNextMino(g)(field.generator(0).get)
+          g.popTransform()
+        }
+        
+        if(rule.numNext >= 2 && !field.generator(1).isEmpty) {    
+          g.pushTransform()
+          g.translate(304, 128)
+          drawNextMino(g)(field.generator(1).get, true)
+          g.popTransform()
+        }
+        
+        g.pushTransform()
+        g.translate(352, 128)
+        for(i <- 2 until rule.numNext){
+          if(!field.generator(i).isEmpty) drawNextMino(g)(field.generator(i).get, true)
+          g.translate(0, 32)      
+        }
+        g.popTransform()
+      }
+      case 1 => {
+        if(rule.numNext >= 1 && !field.generator(0).isEmpty) {
+          g.pushTransform()
+          g.translate(216, 136)
+          drawNextMino(g)(field.generator(0).get)
+          g.popTransform()
+        }
+        
+        g.pushTransform()
+        g.translate(352, 128)
+        for(i <- 1 + nextMinoDisplayCursor until 6 + nextMinoDisplayCursor){
+          if(!field.generator(i).isEmpty) drawNextMino(g)(field.generator(i).get, true)
+          g.translate(0, 32)
+        }
+        g.popTransform()
+        
+        if(nextMinoDisplayCursor > 0) Resource.boldfont.drawString("^", 372, 96, TextAlign.CENTER)
+        if(nextMinoDisplayCursor + 6 < field.generator.size) Resource.boldfont.drawString("v", 372, 256, TextAlign.CENTER)
+      }
     }
-    if(rule.numNext >= 2 && !field.generator(1).isEmpty) {    
-      g.pushTransform()
-      g.translate(304, 128)
-      drawNextMino(g)(field.generator(1).get, true)
-      g.popTransform()
-    }
-    g.pushTransform()
-    g.translate(352, 128)
-    for(i <- 2 until rule.numNext){
-      if(!field.generator(i).isEmpty) drawNextMino(g)(field.generator(i).get, true)
-      g.translate(0, 32)      
-    }
-    g.popTransform()
+
     
     g.pushTransform()
     g.translate(160, 128)

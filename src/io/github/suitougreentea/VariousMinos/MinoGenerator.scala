@@ -3,29 +3,45 @@ package io.github.suitougreentea.VariousMinos
 import io.github.suitougreentea.VariousMinos.rule.Rule
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ArraySeq
+import scala.collection.mutable.Queue
 
 trait MinoGenerator {
-  def next(): Mino
+  var queue: Queue[Mino] = Queue.empty
+  def init()
+  def size = queue.size
+  def apply(i: Int) = queue.get(i)
+  def dequeue(): Mino
   val infinite: Boolean
 }
 
-trait MinoGeneratorInfinite extends MinoGenerator {
+abstract class MinoGeneratorInfinite(size: Int = 7) extends MinoGenerator {
+  def init() {
+    for(i <- 0 until size) queue += generate()
+  }
   val infinite = true
+    def dequeue() = {
+    if(infinite) queue += generate()
+    queue.dequeue()
+  }
+  def generate(): Mino
 }
 
-trait MinoGeneratorFinite extends MinoGenerator {
-  var list: ArraySeq[Mino]
+abstract class MinoGeneratorFinite extends MinoGenerator {
   val infinite = false
+  def init() {}
+  def dequeue() = queue.dequeue()
 }
 
-class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigBombInfinite) extends MinoGeneratorInfinite {
+class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigBombInfinite, size: Int = 7) extends MinoGeneratorInfinite(size) {
   var bombCounter = config.bombOffset
   var allBombCounter = config.allBombOffset
   var whiteCounter = config.whiteOffset
   var blackCounter = config.blackOffset
   var yellowCounter = config.yellowOffset
   rule.randomizer.init(config.set)
-  def next() = {
+  super.init()
+  
+  def generate() = {
     var id = rule.randomizer.next()
     var num = MinoList.numBlocks(id)
     var array: Array[Block] = Array.empty
@@ -62,15 +78,11 @@ class MinoGeneratorBombInfinite(val rule: Rule, val config: MinoGeneratorConfigB
 }
 
 class MinoGeneratorBombFinite(val rule: Rule, val config: MinoGeneratorConfigBombFinite) extends MinoGeneratorFinite {
-  var list: ArraySeq[Mino] = ArraySeq.fill(config.list.size)(null)
   for(j <- 0 until config.list.size){
     var e = config.list(j)
     var num = MinoList.numBlocks(e.id)
     var array = Array.fill(num)(new Block(rule.color.get(e.id)))
     if(e.bomb != -1) array(e.bomb) = new Block(64)
-    list(j) = new Mino(e.id, rule.spawn.getRotation(e.id), array)
-  }
-  def next() = {
-    if(list.contains(0)) list.apply(0) else null
+    queue += new Mino(e.id, rule.spawn.getRotation(e.id), array)
   }
 }

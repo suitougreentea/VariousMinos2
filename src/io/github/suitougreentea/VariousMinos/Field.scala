@@ -20,24 +20,6 @@ class Field(var rule: Rule) {
   var currentMinoY = 0
   
   var generator: MinoGenerator = _
-  private var _nextMino: Array[Mino] = _
-  
-  def nextMino(i: Int) : Mino = {
-    if(generator.infinite){
-      if(0 <= i && i < 7){
-        _nextMino(i) 
-      } else {
-        null
-      }
-    } else {
-      val gen = generator.asInstanceOf[MinoGeneratorFinite]
-      if(0 <= i && i < gen.list.size){
-        gen.list(i)
-      } else {
-        null
-      }
-    }
-  }
   
   var holdMino: Mino = null
   var alreadyHolded = false
@@ -46,7 +28,7 @@ class Field(var rule: Rule) {
   var fallingPieceSetIndependent: ListBuffer[FallingPiece] = ListBuffer.empty
   
   def init(){
-    if(generator.infinite) _nextMino = Array.fill(7)(generator.next())
+    generator.init()
   }
   
   def ghostY: Int = {
@@ -112,7 +94,7 @@ class Field(var rule: Rule) {
   }
   
   def newMino(){
-    if(generator.infinite){
+    /*if(generator.infinite){
       currentMino = nextMino(0)
       for(i <- 0 until 6) _nextMino(i) = nextMino(i + 1)
       _nextMino(6) = generator.next()
@@ -121,7 +103,9 @@ class Field(var rule: Rule) {
       currentMino = gen.list(0)
       for(i <- 0 until gen.list.size - 1) gen.list(i) = gen.list(i + 1)
       gen.list(gen.list.size - 1) = null
-    }
+    }*/
+    
+    currentMino = generator.dequeue()
     
     var (x, y) = rule.spawn.getPosition(currentMino.minoId)
     currentMinoX = x

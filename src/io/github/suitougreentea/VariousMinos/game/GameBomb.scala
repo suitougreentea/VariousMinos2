@@ -77,7 +77,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
 			lockdownTimer = 0
 			forceLockdownTimer = 0
 			lastLines = field.filledLines.length
-      if(field.nextMino(0) == null){
+      if(field.generator.size == 0 && !field.generator.infinite){
         handler.noNewMino(_this)
       } else {
         field.newMino()
@@ -551,22 +551,22 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     }
     g.popTransform()
     
-    if(rule.numNext >= 1 && field.nextMino(0) != null) {
+    if(rule.numNext >= 1 && !field.generator(0).isEmpty) {
       g.pushTransform()
       g.translate(216, 136)
-      drawNextMino(g)(field.nextMino(0))
+      drawNextMino(g)(field.generator(0).get)
       g.popTransform()
     }
-    if(rule.numNext >= 2 && field.nextMino(1) != null) {    
+    if(rule.numNext >= 2 && !field.generator(1).isEmpty) {    
       g.pushTransform()
       g.translate(304, 128)
-      drawNextMino(g)(field.nextMino(1), true)
+      drawNextMino(g)(field.generator(1).get, true)
       g.popTransform()
     }
     g.pushTransform()
     g.translate(352, 128)
     for(i <- 2 until rule.numNext){
-      if(field.nextMino(i) != null) drawNextMino(g)(field.nextMino(i), true)
+      if(!field.generator(i).isEmpty) drawNextMino(g)(field.generator(i).get, true)
       g.translate(0, 32)      
     }
     g.popTransform()

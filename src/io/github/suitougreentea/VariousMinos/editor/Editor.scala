@@ -152,11 +152,11 @@ abstract class Editor[T <: Stage](file: File, stage: StageFile[T])(implicit ct: 
       if(i.isKeyPressed(Input.KEY_F1)) {
         implicit val format =  DefaultFormats
         stage.stages(currentStageId) = make()
-        val output = Serialization.write(stage)
+        val output = Serialization.writePretty(stage)
         
-        val writer = new FileWriter(file, false);
-        writer.write(output);
-        writer.close();
+        val writer = new FileWriter(file, false)
+        writer.write(output)
+        writer.close()
       }
     }
   }

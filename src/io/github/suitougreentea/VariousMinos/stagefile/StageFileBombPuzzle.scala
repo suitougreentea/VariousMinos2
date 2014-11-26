@@ -12,8 +12,9 @@ case class BombPuzzleStage (
   var mino_list: Array[BombPuzzleMinoList],
   var gravity: Int,
   var lock: Int,
-  var field: List[Array[Int]]
+  var field: Array[Array[Int]]
 ) extends Stage {
+  if(field.size < 22) field = field.padTo(22, Array.fill(10)(0))
 }
 
 case class BombPuzzleMinoList (

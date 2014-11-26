@@ -21,7 +21,7 @@ class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends E
   var _field: TypeEditorField = _
   
   def clone(from: BombPuzzleStage): BombPuzzleStage = {
-    var newField = List.fill(22)(Array.fill(10)(0))
+    var newField = Array.fill(22)(Array.fill(10)(0))
     for(iy <- 0 until from.field.size; ix <- 0 until 10) newField(iy)(ix) = from.field(iy)(ix)
     from.copy(field = newField)
   }
@@ -36,7 +36,7 @@ class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends E
     fieldList = Array(_field, _mino_list, _gravity, _lock)
   }
 
-  def empty(): BombPuzzleStage = BombPuzzleStage(Array(new BombPuzzleMinoList(0, 0, -1)), 1, 60, List.fill(22)(Array.fill(10)(0)))
+  def empty(): BombPuzzleStage = BombPuzzleStage(Array(new BombPuzzleMinoList(0, 0, -1)), 1, 60, Array.fill(22)(Array.fill(10)(0)))
 
   def make(): BombPuzzleStage = BombPuzzleStage(
       _mino_list.value,

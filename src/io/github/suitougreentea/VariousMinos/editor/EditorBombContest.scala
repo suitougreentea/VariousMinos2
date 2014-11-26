@@ -84,10 +84,10 @@ class EditorBombContest(var file: File, var stage: StageFileBombContest) extends
       _field.value
   )
   
-  def empty() = BombContestStage(100, List(4, 5, 6, 7, 8, 9, 10), 1, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 60, List.fill(22)(Array.fill(10)(0)))
+  def empty() = BombContestStage(100, List(4, 5, 6, 7, 8, 9, 10), 1, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 60, Array.fill(22)(Array.fill(10)(0)))
   
   def clone(from: BombContestStage) = {
-    var newField = List.fill(22)(Array.fill(10)(0))
+    var newField = Array.fill(22)(Array.fill(10)(0))
     for(iy <- 0 until from.field.size; ix <- 0 until 10) newField(iy)(ix) = from.field(iy)(ix)
     from.copy(mino_set = from.mino_set.toList, field = newField)
   }

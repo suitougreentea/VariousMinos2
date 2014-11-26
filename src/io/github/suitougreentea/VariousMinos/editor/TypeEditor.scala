@@ -96,7 +96,7 @@ class TypeEditorMinoSet(val displayName: String, var value: List[Int]) extends T
   }
 }
 
-class TypeEditorField(val displayName: String, var value: List[Array[Int]], val availableBlocks: List[Int]) extends TypeEditor[List[Array[Int]]] with CommonRendererBomb {
+class TypeEditorField(val displayName: String, var value: Array[Array[Int]], val availableBlocks: List[Int]) extends TypeEditor[Array[Array[Int]]] with CommonRendererBomb {
   val hasDetailedEditor: Boolean = true
   override def valueString = "[EDIT]"
 
@@ -111,13 +111,50 @@ class TypeEditorField(val displayName: String, var value: List[Array[Int]], val 
     if(i.isKeyPressed(Input.KEY_A)) blockCursor -= 1
     if(i.isKeyPressed(Input.KEY_D)) blockCursor += 1
     
-    if(i.isKeyPressed(Input.KEY_UP) && cursorY < 21) cursorY += 1
-    if(i.isKeyPressed(Input.KEY_DOWN) && cursorY >= 1) cursorY -= 1
-    if(i.isKeyPressed(Input.KEY_LEFT) && cursorX >= 1) cursorX -= 1
-    if(i.isKeyPressed(Input.KEY_RIGHT) && cursorX < 9) cursorX += 1
+    if(blockCursor < 0) blockCursor = 0
+    if(blockCursor >= availableBlocks.size) blockCursor = availableBlocks.size - 1
+    
+    if(i.isKeyDown(Input.KEY_LCONTROL)){
+      if(i.isKeyPressed(Input.KEY_UP)) value = Array.fill(10)(0) +: value.init
+      if(i.isKeyPressed(Input.KEY_DOWN)) value = value.tail :+ Array.fill(10)(0)
+      // TODO: There might be better way
+      if(i.isKeyPressed(Input.KEY_LEFT)) value = value.map(e => Array(e(1), e(2), e(3), e(4), e(5), e(6), e(7), e(8), e(9), 0))
+      if(i.isKeyPressed(Input.KEY_RIGHT)) value = value.map(e => Array(0, e(0), e(1), e(2), e(3), e(4), e(5), e(6), e(7), e(8)))
+    } else {
+      if(i.isKeyPressed(Input.KEY_UP) && cursorY < 21) cursorY += 1
+      if(i.isKeyPressed(Input.KEY_DOWN) && cursorY >= 1) cursorY -= 1
+      if(i.isKeyPressed(Input.KEY_LEFT) && cursorX >= 1) cursorX -= 1
+      if(i.isKeyPressed(Input.KEY_RIGHT) && cursorX < 9) cursorX += 1
+    }
     
     if(i.isKeyDown(Input.KEY_SPACE)) value(cursorY)(cursorX) = availableBlocks(blockCursor)
     if(i.isKeyDown(Input.KEY_LSHIFT)) value(cursorY)(cursorX) = 0
+    if(i.isKeyPressed(Input.KEY_Q)) {
+      if(value(cursorY)(cursorX) != 0){
+        blockCursor = availableBlocks.indexWhere(x => x == value(cursorY)(cursorX))
+      }
+    }
+    
+    if(i.isKeyPressed(Input.KEY_R)){
+      for(i <- 21 to cursorY + 1 by -1){
+        value(i) = value(i - 1)
+      }
+      value(cursorY) = value(cursorY + 1).clone()
+    }
+    
+    if(i.isKeyPressed(Input.KEY_E)){
+      if(i.isKeyDown(Input.KEY_LCONTROL)) {
+        for(i <- cursorY to 20){
+          value(i) = value(i + 1)
+        }
+        value(21) = Array.fill(10)(0)
+      } else {
+        for(i <- 21 to cursorY + 1 by -1){
+          value(i) = value(i - 1)
+        }
+        value(cursorY) = Array.fill(10)(0)
+      }
+    }
   }
   override def renderDetailedEditor(g: Graphics) {
     for((e, i) <- availableBlocks.zipWithIndex){
@@ -198,14 +235,23 @@ class TypeEditorMinoList(val displayName: String, var value: Array[BombPuzzleMin
       minos(cursorY) = new EditorMino(0, 0, -1)
       updateValue()
     }
+    if(i.isKeyPressed(Input.KEY_C)){
+      minos = minos :+ null
+      for(i <- minos.length - 2 to cursorY by -1){
+        minos(i + 1) = minos(i)
+      }
+      var from = minos(cursorY + 1)
+      minos(cursorY) = new EditorMino(from.id, from.`type`, from.bomb)
+      updateValue()
+    }
     if(i.isKeyPressed(Input.KEY_D) && minos.length > 1){
       if(cursorY < minos.size - 1){
-        for(i <- cursorY to minos.size - 2 by -1){
+        for(i <- cursorY to minos.size - 2){
           minos(i) = minos(i + 1)
         }
       }
       minos = minos.init
-      cursorY -= 1
+      if(cursorY >= minos.size) cursorY -= 1
       updateValue()
     }
   }

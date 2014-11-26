@@ -400,14 +400,17 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
       // 上が優先される
       for(iy <- field.height - 1 to 0 by -1; ix <- 0 until 10){
         if(field(ix, iy).id == 64){
-          if(!makingBigBombSet.contains(Tuple2(ix - 1, iy)) && !makingBigBombSet.contains(Tuple2(ix, iy + 1)) && !makingBigBombSet.contains(Tuple2(ix - 1, iy + 1))){
-            if(field(ix + 1, iy).id == 64 && field(ix, iy - 1).id == 64 && field(ix + 1, iy - 1).id == 64){
+          if(!alongToBigBombSet(ix, iy)){
+            if(field(ix + 1, iy).id == 64 && !alongToBigBombSet(ix + 1, iy) &&
+                field(ix, iy - 1).id == 64 && !alongToBigBombSet(ix, iy - 1) &&
+                field(ix + 1, iy - 1).id == 64 && !alongToBigBombSet(ix + 1, iy - 1)){
               makingBigBombSet += Tuple2(ix, iy)
             }
           }
         }
       }
   }
+  def alongToBigBombSet(ix: Int, iy: Int) = makingBigBombSet.contains(Tuple2(ix - 1, iy)) || makingBigBombSet.contains(Tuple2(ix - 1, iy)) || makingBigBombSet.contains(Tuple2(ix, iy + 1)) || makingBigBombSet.contains(Tuple2(ix - 1, iy + 1))
   def makeBigBomb(): Int = {
     var i = 0
     for(e <- makingBigBombSet){

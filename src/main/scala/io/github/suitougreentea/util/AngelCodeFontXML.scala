@@ -46,15 +46,16 @@ class AngelCodeFontXML (fntPath: String){
   }
   
   def measureChar(c: Char): Int = {
-    val glyph = chars.getOrElse(c, null)
-    if(glyph != null){
-      glyph.xadvance
+    val glyphopt = chars.get(c)
+    if(!glyphopt.isEmpty){
+      glyphopt.get.xadvance
     } else 0
   }
   
-  def drawChar(char: Char, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)): Int = {
-    val glyph = chars.getOrElse(char, null)
-    if(char != null){
+  def drawChar(c: Char, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)): Int = {
+    val glyphopt = chars.get(c)
+    if(!glyphopt.isEmpty){
+      val glyph = glyphopt.get
       glyph.page.draw(x + glyph.xoffset,
           y + glyph.yoffset + lineHeight - base,
           x + glyph.xoffset + glyph.width,
@@ -64,8 +65,10 @@ class AngelCodeFontXML (fntPath: String){
           glyph.x + glyph.width,
           glyph.y + glyph.height,
           color)
+      glyph.xadvance
+    } else {
+      0
     }
-    glyph.xadvance
   }
   
   def drawStringEmbedded(str: String, x: Int, y: Int, color: Color = new Color(1f, 1f, 1f)) {
@@ -92,10 +95,10 @@ class AngelCodeFontXML (fntPath: String){
     var i = 0
     while(i < str.length){
       var c = str(i)
-      if(c == "@"){
+      if(c == '@'){
         str(i + 1) match {
           case '#' => {
-            if(str(i + 8) == "#") {
+            if(str(i + 8) == '#') {
               i += 9
             } else {
               i += 11

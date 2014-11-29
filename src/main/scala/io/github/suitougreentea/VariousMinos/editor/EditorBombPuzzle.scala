@@ -6,15 +6,14 @@ import java.io.File
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombPuzzle
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
-import io.github.suitougreentea.VariousMinos.Resource
+import io.github.suitougreentea.VariousMinos.{PlayerData, Resource, CommonRendererBomb}
 import io.github.suitougreentea.VariousMinos.game.GameBomb
 import io.github.suitougreentea.VariousMinos.game.Game
 import io.github.suitougreentea.VariousMinos.game.HandlerBombPuzzle
 import io.github.suitougreentea.VariousMinos.rule.RuleStandard
-import io.github.suitougreentea.VariousMinos.CommonRendererBomb
 import io.github.suitougreentea.VariousMinos.stagefile.BombPuzzleMinoList
 
-class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle) extends Editor[BombPuzzleStage](file, stage) with CommonRendererBomb {
+class EditorBombPuzzle(var file: File, var stage: StageFileBombPuzzle, val player: PlayerData) extends Editor[BombPuzzleStage](file, stage, player) with CommonRendererBomb {
   var _mino_list: TypeEditorMinoList = _
   var _gravity: TypeEditorInt = _
   var _lock: TypeEditorInt = _

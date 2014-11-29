@@ -17,15 +17,13 @@ import net.liftweb.json.DefaultFormats
 import io.github.suitougreentea.util.TextAlign
 import java.io.FileWriter
 import java.io.File
-import io.github.suitougreentea.VariousMinos.Control
-import io.github.suitougreentea.VariousMinos.Resource
-import io.github.suitougreentea.VariousMinos.CommonRendererBomb
+import io.github.suitougreentea.VariousMinos._
 import io.github.suitougreentea.VariousMinos.stagefile.StageFile
 import io.github.suitougreentea.VariousMinos.stagefile.Stage
 import scala.reflect.ClassTag
 import io.github.suitougreentea.VariousMinos.game.Game
 
-abstract class Editor[T <: Stage](file: File, stage: StageFile[T])(implicit ct: ClassTag[T]) {
+abstract class Editor[T <: Stage](file: File, stage: StageFile[T], player: PlayerData)(implicit ct: ClassTag[T]) {
   var currentStageId = 0
   var currentStage: T = _
   
@@ -134,7 +132,7 @@ abstract class Editor[T <: Stage](file: File, stage: StageFile[T])(implicit ct: 
             stageMenu = true
           }
           case -1 => {
-            wrapper = new GameWrapper(0, new Control(i)) {
+            wrapper = new GameWrapper(0, player, i) {
               override def exit(code: Int){
                 phase = 0
                 testplay = false

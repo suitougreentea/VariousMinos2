@@ -10,8 +10,7 @@ import org.newdawn.slick.Input
 import java.io.FileReader
 import net.liftweb.json.JsonParser
 import java.io.File
-import io.github.suitougreentea.VariousMinos.Resource
-import io.github.suitougreentea.VariousMinos.GameStageEditor
+import io.github.suitougreentea.VariousMinos.{PlayerData, Resource, GameStageEditor}
 import io.github.suitougreentea.VariousMinos.editor.Editor
 import io.github.suitougreentea.VariousMinos.editor.EditorBombContest
 import io.github.suitougreentea.VariousMinos.stagefile.StageFileBombContest
@@ -49,10 +48,14 @@ class StateEditorMenu(@BeanProperty val ID: Int) extends BasicGameState {
       
       implicit val formats = DefaultFormats
       val json = JsonParser.parse(reader, false)
+
+      val playerFile = new File("save/player/00000000-0000-0000-0000-000000000000.json")
+      val playerReader = new FileReader(playerFile)
+      val playerJson = JsonParser.parse(playerReader, false)
       
       sbg.asInstanceOf[GameStageEditor].editor = (json \ "type").asInstanceOf[JString].s match {
-        case "BombContest" => new EditorBombContest(file, json.extract[StageFileBombContest])
-        case "BombPuzzle" => new EditorBombPuzzle(file, json.extract[StageFileBombPuzzle])
+        case "BombContest" => new EditorBombContest(file, json.extract[StageFileBombContest], playerJson.extract[PlayerData])
+        case "BombPuzzle" => new EditorBombPuzzle(file, json.extract[StageFileBombPuzzle], playerJson.extract[PlayerData])
       }
       
       reader.close()

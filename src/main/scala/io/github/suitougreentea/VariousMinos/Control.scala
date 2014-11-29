@@ -4,15 +4,15 @@ import org.newdawn.slick.Input
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
-class Control(val input: Input) {
-  val keyConfig: HashMap[Buttons.Value, HashSet[Int]] = HashMap.empty
-  keyConfig(Buttons.UP) = HashSet(Input.KEY_UP)
-  keyConfig(Buttons.DOWN) = HashSet(Input.KEY_DOWN)
-  keyConfig(Buttons.LEFT) = HashSet(Input.KEY_LEFT)
-  keyConfig(Buttons.RIGHT) = HashSet(Input.KEY_RIGHT)
-  keyConfig(Buttons.A) = HashSet(Input.KEY_Z)
-  keyConfig(Buttons.B) = HashSet(Input.KEY_X)
-  keyConfig(Buttons.C) = HashSet(Input.KEY_C)
+class Control(val input: Input, val config: KeyConfig) {
+  val keyConfig: HashMap[Buttons.Value, Set[Int]] = HashMap.empty
+  keyConfig(Buttons.UP) = config.up.toSet
+  keyConfig(Buttons.DOWN) = config.down.toSet
+  keyConfig(Buttons.LEFT) = config.left.toSet
+  keyConfig(Buttons.RIGHT) = config.right.toSet
+  keyConfig(Buttons.A) = config.a.toSet
+  keyConfig(Buttons.B) = config.b.toSet
+  keyConfig(Buttons.C) = config.c.toSet
   
   def pressed(button: Buttons.Value): Boolean = {
     for(e <- keyConfig(button)){

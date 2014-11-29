@@ -252,6 +252,8 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
   }
   
   def handle(game: GameBomb, level: Int): Unit = {
-    
+    if(level == 1000) {
+      game.wrapper.exit(1)
+    }
   }
 }

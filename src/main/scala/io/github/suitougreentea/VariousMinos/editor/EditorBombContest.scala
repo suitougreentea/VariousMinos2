@@ -17,12 +17,10 @@ import net.liftweb.json.DefaultFormats
 import io.github.suitougreentea.util.TextAlign
 import java.io.FileWriter
 import java.io.File
-import io.github.suitougreentea.VariousMinos.Control
-import io.github.suitougreentea.VariousMinos.Resource
-import io.github.suitougreentea.VariousMinos.CommonRendererBomb
+import io.github.suitougreentea.VariousMinos.{PlayerData, Control, Resource, CommonRendererBomb}
 
 
-class EditorBombContest(var file: File, var stage: StageFileBombContest) extends Editor[BombContestStage](file, stage) with CommonRendererBomb {
+class EditorBombContest(var file: File, var stage: StageFileBombContest, val player: PlayerData) extends Editor[BombContestStage](file, stage, player) with CommonRendererBomb {
   var _field: TypeEditorField = _
   var _mino_num: TypeEditorInt = _
   var _mino_set: TypeEditorMinoSet = _

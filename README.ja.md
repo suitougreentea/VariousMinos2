@@ -23,6 +23,8 @@ Coming soon....
   * `stageeditor.bat` または `stageeditor.sh` を実行
   * 手動で起動する場合: `javaw -Djava.library.path=lib/native/ -cp variousminos.jar io.github.suitougreentea.VariousMinos.StageEditor`
 
+詳しい説明は[こちら](doc/Usage.md)
+
 ## ライセンス
 VariousMinosは [MIT License](LICENSE.txt) の元にリリースされています。
 

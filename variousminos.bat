@@ -1,0 +1,1 @@
+launcher io.github.suitougreentea.VariousMinos.VariousMinos

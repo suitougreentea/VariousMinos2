@@ -7,7 +7,7 @@ import org.newdawn.slick.AppGameContainer
 
 object VariousMinos {
   def main(args: Array[String]) {
-    val game = new GameVariousMinos("VariousMinos2")
+    val game = new GameVariousMinos("VariousMinos Alpha-0.1")
     val app = new AppGameContainer(game)
     app.setDisplayMode(800, 600, false)
     app.setTargetFrameRate(60)

@@ -12,6 +12,9 @@ rm -fv `find distribute/res/ -name *.xcf -type f`
 rm -fv `find distribute/res/ -name *.bmp -type f`
 cp -r stage/ distribute/stage/
 cp -r save/ distribute/save/
+cp -r doc/ distribute/doc/
 cp *.bat distribute/
 cp *.sh distribute/
+cp *.md distribute/
+cp *.txt distribute/
 echo Finished

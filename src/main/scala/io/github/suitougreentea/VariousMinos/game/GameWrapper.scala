@@ -77,17 +77,17 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
       override def handler: HandlerBomb = ???
     },
     new ModeMenuItemWithDifficulty("Survival", new Color(1f, 1f, 1f)) {
-      override val difficultyList: List[String] = List("Easy", /*"Normal", "Hard", "VeryHard", "Insane",*/ "FC-B1", "FC-W2", "FC-B2", "FC-W3")
+      override val difficultyList: List[String] = List("Easy", "Normal", /*"Hard", "VeryHard", "Insane",*/ "FC-B1", "FC-W2", "FC-B2", "FC-W3")
       override def handler: HandlerBomb = cursor match {
         case 0 => new HandlerBombSurvivalEasy()
-        //case 1 => new HandlerBombSurvivalNormal()
+        case 1 => new HandlerBombSurvivalNormal()
         //case 2 => new HandlerBombSurvivalHard()
         //case 3 => new HandlerBombSurvivalVeryHard()
         //case 4 => new HandlerBombSurvivalInsane()
-        case 1 => new HandlerBombSurvivalFreezeChallenge(1, 0)
-        case 2 => new HandlerBombSurvivalFreezeChallenge(0, 1)
-        case 3 => new HandlerBombSurvivalFreezeChallenge(1, 1)
-        case 4 => new HandlerBombSurvivalFreezeChallenge(0, 2)
+        case 2 => new HandlerBombSurvivalFreezeChallenge(1, 0)
+        case 3 => new HandlerBombSurvivalFreezeChallenge(0, 1)
+        case 4 => new HandlerBombSurvivalFreezeChallenge(1, 1)
+        case 5 => new HandlerBombSurvivalFreezeChallenge(0, 2)
       }
     }
   )

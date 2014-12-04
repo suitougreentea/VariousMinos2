@@ -4,6 +4,23 @@ import io.github.suitougreentea.VariousMinos.Resource
 import io.github.suitougreentea.util.TextAlign
 import org.newdawn.slick.Graphics
 
+/*
+ * Speed Structure
+ * * Before Spawn
+ * * DAS
+ * * Gravity
+ * * Lock (Force)
+ * * After Spawn
+ * * (Counting = 0)
+ * * Before Explosion
+ * * Bomb Middle/Max
+ * * After Explosion
+ * * Before Falling
+ * * Falling Gravity
+ * * After Falling
+ * * Big Bomb
+ */
+
 trait HandlerBombSurvival extends HandlerBomb {
   var level = 0
   var nextStop = 100

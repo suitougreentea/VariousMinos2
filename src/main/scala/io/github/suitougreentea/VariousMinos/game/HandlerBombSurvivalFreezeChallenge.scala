@@ -33,6 +33,7 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
 
     applyDefaultSpeed(game)
     game.phaseMoving.beforeTime = 10
+    game.firstMoveTimerMax = 8
     game.fallCounterDelta = 30f
     game.lockdownTimerMax = 30
     game.bombTimerMiddle = 4
@@ -66,6 +67,7 @@ class HandlerBombSurvivalFreezeChallenge(val color: Int, val blockLevel: Int) ex
       game.wrapper.exit(1)
     } else {
       setSpeed(game, speed(level))
+      if(level == 700) game.firstMoveTimerMax = 6
     }
   }
 }

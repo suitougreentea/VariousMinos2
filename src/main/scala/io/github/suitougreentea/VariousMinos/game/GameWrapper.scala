@@ -123,7 +123,6 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
             phase = 2
             implicit val formats = DefaultFormats
             bombContestStage = JsonParser.parse(new FileReader("stage/contest.json"), true).extract[StageFileBombContest]
-            println(bombContestStage.toString())
           }
           case 2 => {
             rule = ruleCursor

@@ -20,19 +20,26 @@ class HandlerBombSurvivalNormal extends HandlerBombSurvival {
         allBombFrequency = 30
       )
     )
-    setParam(game, param(0))
 
-    game.forceLockdownTimerMax = 180
+    applyDefaultSpeed(game)
     game.phaseMoving.beforeTime = 25
     game.bombTimerMiddle = 10
     game.bombTimerMax = 20
+    game.fallingPieceCounterDelta = 1f
     game.phaseMakingBigBomb.beforeTime = 8
     game.phaseMakingBigBomb.afterTime = 8
-    game.fallingPieceCounterDelta = 1f
+    setParam(game, param(0))
   }
 
   def handle(game: GameBomb, level: Int): Unit = {
     setParam(game, param(level))
+    if(level == 200) game.fallingPieceCounterDelta = 30f
+    if(level == 300) {
+      game.phaseMakingBigBomb.beforeTime = 4
+      game.phaseMakingBigBomb.afterTime = 4
+      game.bombTimerMiddle = 8
+      game.bombTimerMax = 16
+    }
   }
 
   // gravity, lock

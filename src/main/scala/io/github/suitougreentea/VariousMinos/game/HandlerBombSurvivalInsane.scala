@@ -15,16 +15,16 @@ class HandlerBombSurvivalInsane extends HandlerBombSurvival {
             allBombFrequency = 15
          )
     )
+
+    applyDefaultSpeed(game)
+    game.phaseMoving.beforeTime = 4
     game.fallCounterDelta = 30f
     game.lockdownTimerMax = 8
-    game.forceLockdownTimerMax = 180
-    game.phaseMoving.beforeTime = 4
     game.phaseErasing.beforeTime = 0
     game.bombTimerMiddle = 3
     game.bombTimerMax = 4
     game.phaseMakingBigBomb.beforeTime = 0
     game.phaseMakingBigBomb.afterTime = 0
-    game.fallingPieceCounterDelta = 30f
   }
 
   def handle(game: GameBomb, level: Int): Unit = {

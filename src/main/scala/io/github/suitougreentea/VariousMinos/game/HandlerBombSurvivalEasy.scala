@@ -20,15 +20,12 @@ class HandlerBombSurvivalEasy extends HandlerBombSurvival {
          )
     )
 
-    setGravity(game, speed(0))
-    game.lockdownTimerMax = 60
-    game.forceLockdownTimerMax = 180
+    applyDefaultSpeed(game)
     game.phaseMoving.beforeTime = 25
-    game.bombTimerMiddle = 10
-    game.bombTimerMax = 20
-    game.phaseMakingBigBomb.beforeTime = 8
-    game.phaseMakingBigBomb.afterTime = 8
+    game.bombTimerMiddle = 20
+    game.bombTimerMax = 30
     game.fallingPieceCounterDelta = 1f
+    setGravity(game, speed(0))
   }
 
   def speed(handleLevel: Int) = handleLevel match {
@@ -75,20 +72,16 @@ class HandlerBombSurvivalEasy extends HandlerBombSurvival {
 
   def handle(game: GameBomb, level: Int){
     setGravity(game, speed(level))
-    if(level == 100){
-      game.phaseMoving.beforeTime = 20
-      game.bombTimerMiddle = 10
-      game.bombTimerMax = 20
-    }
     if(level == 200){
       game.phaseMoving.beforeTime = 16
-      game.bombTimerMiddle = 8
-      game.bombTimerMax = 15
+      game.bombTimerMiddle = 10
+      game.bombTimerMax = 18
     }
     if(level == 300){
       game.phaseMoving.beforeTime = 14
       game.bombTimerMiddle = 7
       game.bombTimerMax = 12
+      game.fallingPieceCounterDelta = 30f
       game.allEraseFlag = true
       ending = true
     }

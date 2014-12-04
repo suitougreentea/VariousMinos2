@@ -79,7 +79,27 @@ trait HandlerBombSurvival extends HandlerBomb {
       }
     }
   }
-  
+
+  def applyDefaultSpeed(game: GameBomb): Unit = {
+    game.phaseMoving.beforeTime = 30
+    game.firstMoveTimerMax = 10
+    game.fallCounterDelta = 1/60f
+    game.lockdownTimerMax = 60
+    game.forceLockdownTimerMax = 180
+    game.phaseMoving.afterTime = 0
+    game.phaseCounting.beforeTime = 0
+    game.phaseCounting.afterTime = 0
+    game.phaseErasing.beforeTime = 10
+    game.bombTimerMiddle = 15
+    game.bombTimerMax = 30
+    game.phaseErasing.afterTime = 0
+    game.phaseFalling.beforeTime = 10
+    game.fallingPieceCounterDelta = 30f
+    game.phaseFalling.afterTime = 0
+    game.phaseMakingBigBomb.beforeTime = 8
+    game.phaseMakingBigBomb.afterTime = 8
+  }
+
   def handle(game: GameBomb, level: Int)
 }
 

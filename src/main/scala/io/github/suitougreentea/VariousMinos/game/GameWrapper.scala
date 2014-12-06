@@ -136,8 +136,8 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
       case 2 => {
         mode match {
           case 1 => {
-            if (control.pressed(Buttons.LEFT)) stageCursor -= 1
-            if (control.pressed(Buttons.RIGHT)) stageCursor += 1
+            if (control.pressed(Buttons.LEFT) && stageCursor > 0) stageCursor -= 1
+            if (control.pressed(Buttons.RIGHT) && stageCursor < bombContestStage.stages.length - 1) stageCursor += 1
             if (control.pressed(Buttons.A)) {
               stage = stageCursor
               startGame()
@@ -145,8 +145,8 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
             }
           }
           case 2 => {
-            if (control.pressed(Buttons.LEFT)) stageCursor -= 1
-            if (control.pressed(Buttons.RIGHT)) stageCursor += 1
+            if (control.pressed(Buttons.LEFT) && stageCursor > 0) stageCursor -= 1
+            if (control.pressed(Buttons.RIGHT) && stageCursor < bombPuzzleStage.stages.length - 1) stageCursor += 1
             if (control.pressed(Buttons.A)) {
               stage = stageCursor
               startGame()
@@ -240,7 +240,7 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
           }
           case 2 => {
             Resource.boldfont.drawString("Select Stage", 80, 16, TextAlign.CENTER, new Color(0.8f, 0.2f, 0.8f))
-            Resource.boldfont.drawString("Stage: " + stageCursor, 32, 64)
+            Resource.boldfont.drawString("Stage: " + (stageCursor + 1), 32, 64)
           }
           case 3 => {
             Resource.boldfont.drawString("Clear!", 80, 16, TextAlign.CENTER, new Color(0.8f, 1f, 0.2f))

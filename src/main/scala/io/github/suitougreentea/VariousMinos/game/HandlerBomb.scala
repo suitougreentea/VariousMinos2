@@ -58,6 +58,9 @@ class HandlerBombContest(val stageId: Int, val stage: BombContestStage) extends 
     )
     game.field.generator = new MinoGeneratorBombInfinite(game.rule, generatorConfig)
     numMino = stage.mino_num
+
+    game.fallCounterDelta = stage.gravity / 60f
+    game.lockdownTimerMax = stage.lock
   }
   override def render(game: GameBomb, g: Graphics) {
     Resource.boldfont.drawString((stageId + 1).toString(), 384, 512, TextAlign.RIGHT)
@@ -98,6 +101,8 @@ class HandlerBombPuzzle(val stageId: Int, val stage: BombPuzzleStage) extends Ha
     game.rule.enableHold = false
     game.field.generator = new MinoGeneratorBombFinite(game.rule, new MinoGeneratorConfigBombFinite(stage.mino_list)) 
     game.nextMinoDisplayType = 1
+    game.fallCounterDelta = stage.gravity / 60f
+    game.lockdownTimerMax = stage.lock
   }
   
   override def allClear(game: GameBomb) {

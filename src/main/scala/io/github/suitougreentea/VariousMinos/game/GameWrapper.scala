@@ -111,7 +111,7 @@ class GameWrapper(val side: Int, val data: PlayerData, val input: Input) {
       }
       case 1 => {
         if (control.pressed(Buttons.UP) && ruleCursor > 0) ruleCursor -= 1
-        if (control.pressed(Buttons.DOWN) && ruleCursor < 3) ruleCursor += 1
+        if (control.pressed(Buttons.DOWN) && ruleCursor < 4) ruleCursor += 1
         if (control.pressed(Buttons.A)) mode match {
           case 0 | 3 | 4 => {
             rule = ruleCursor

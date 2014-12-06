@@ -1,6 +1,6 @@
 package io.github.suitougreentea.VariousMinos.game
 
-import io.github.suitougreentea.VariousMinos.Resource
+import io.github.suitougreentea.VariousMinos.{Timer, Resource}
 import io.github.suitougreentea.util.TextAlign
 import org.newdawn.slick.Graphics
 
@@ -29,10 +29,20 @@ trait HandlerBombSurvival extends HandlerBomb {
   
   var handleLevel: List[Int]
   var handleLevelIterator = 0
-  
+
+  var timer = new Timer()
+
+  override def start(game: GameBomb): Unit = {
+    timer.start()
+  }
+  override def update(game: GameBomb): Unit = {
+
+  }
+
   override def render(game: GameBomb, g: Graphics) {
     Resource.boldfont.drawString(nextStop.toString(), 384, 512, TextAlign.RIGHT)
     Resource.boldfont.drawString(level.toString(), 384, 488, TextAlign.RIGHT)
+    Resource.boldfont.drawString(timer.mkString("%1$02d:%2$02d:%3$02d"), 143, 512, TextAlign.RIGHT)
   }
   override def newMino(game: GameBomb) {
     increaseLevel(game, 1, false)

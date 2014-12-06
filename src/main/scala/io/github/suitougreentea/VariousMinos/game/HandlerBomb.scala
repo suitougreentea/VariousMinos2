@@ -16,6 +16,8 @@ import io.github.suitougreentea.VariousMinos.stagefile.BombPuzzleStage
 
 trait HandlerBomb {  
   def init(game: GameBomb)
+  def start(game: GameBomb) {}
+  def update(game: GameBomb) {}
   def render(game: GameBomb, g: Graphics) {}
   def allClear(game: GameBomb) {}
   def stuck(game: GameBomb) { game.wrapper.exit(0) }

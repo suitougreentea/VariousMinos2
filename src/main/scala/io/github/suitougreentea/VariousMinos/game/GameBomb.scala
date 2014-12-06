@@ -46,6 +46,9 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
     override def handleAfterBefore(executer: PhaseExecuter){
       makeBigBomb()
     }
+    override def handleAfterAfter(executer: PhaseExecuter) {
+      handler.start(_this)
+    }
     
     def procedureWorking(executer: PhaseExecuter){
       val c = wrapper.control
@@ -514,6 +517,7 @@ class GameBomb(val wrapper: GameWrapper, val handler: HandlerBomb, val rule: Rul
 
   def update() {
         executer.exec()
+    handler.update(this)
   }
   def render(g: Graphics) {
     g.setBackground(Color.darkGray)

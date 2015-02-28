@@ -1,6 +1,8 @@
 [日本語](README.ja.md)
 
 # VariousMinos
+![Development status: Inactive](https://img.shields.io/badge/Development%20status-Inactive-red.svg)
+![Progress: Alpha](https://img.shields.io/badge/Progress-Pre--Alpha-orange.svg)
 
 A puzzle game inspired by Bombliss.
 
